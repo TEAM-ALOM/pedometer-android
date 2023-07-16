@@ -1,6 +1,7 @@
 package com.example.pedometer
 
 import BaseActivity
+import Day
 import android.os.Bundle
 import com.example.pedometer.databinding.ActivityMainBinding
 
@@ -10,15 +11,16 @@ class MainActivity :  BaseActivity<ActivityMainBinding>({ ActivityMainBinding.in
         super.onCreate(savedInstanceState)
         val view = binding.root
         setContentView(view)
-        val textStepsToday=binding.viewStepsToday
-        val textStepsAvg=binding.viewStepsAvg
-        textStepsToday.setText("현재 5000 걸음")
-        textStepsAvg.setText("일주일간 평균 8000걸음을 걸었습니다.")
-        //setFragment()
+        val textStepsToday=binding.viewStepsToday// 현재 걸음 수
+        val textStepsAvg=binding.viewStepsAvg// 일주일간 평균 걸음 수
+        val stepsNow=5000
+        val stepsAvg=8000
+        textStepsToday.text = "현재 $stepsNow 걸음"//현재 걸음 수
+        textStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."//평균 걸음 수
+        supportFragmentManager.beginTransaction()// Day 프래그먼트 frame layout에 전시
+            .add(R.id.frameLayout, Day())
+            .commit()
+
     }
-    /*private fun setFragment() {
-        val transaction = supportFragmentManager.beginTransaction()
-            .add(R.id.fragmentContainerView, Day())
-        transaction.commit()
-    }*/
+
 }

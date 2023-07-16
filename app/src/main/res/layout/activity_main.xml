@@ -5,7 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/viewStepsToday"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <TextView
         android:id="@+id/viewStepsToday"
         android:layout_width="wrap_content"
@@ -30,4 +38,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/viewStepsToday"
         app:layout_constraintVertical_bias="0.392" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
