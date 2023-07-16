@@ -16,6 +16,7 @@ abstract class BaseActivity<B: ViewBinding>(//액티비티 뷰바인딩 참조 �
         setContentView(binding.root)
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null

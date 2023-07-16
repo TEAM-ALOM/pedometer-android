@@ -19,6 +19,7 @@ abstract class BaseFragment<B: ViewBinding>: Fragment() {//프래그먼트 뷰 �
         return binding.root
     }
 
+
     abstract fun getFragmentBinding(inflater: LayoutInflater, container: ViewGroup?): B
 
     override fun onDestroyView() {
