@@ -13,6 +13,9 @@ class MainActivity :  BaseActivity<ActivityMainBinding>({ ActivityMainBinding.in
         setContentView(view)
         val textStepsToday=binding.viewStepsToday// 현재 걸음 수
         val textStepsAvg=binding.viewStepsAvg// 일주일간 평균 걸음 수
+        textStepsToday.setTextSize(14f)
+        textStepsToday.setTextSize(28f)
+
         val stepsNow=5000
         val stepsAvg=8000
         textStepsToday.text = "현재 $stepsNow 걸음"//현재 걸음 수
