@@ -1,1 +1,0 @@
-# android-team-project-pedometer
