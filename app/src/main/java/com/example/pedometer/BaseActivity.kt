@@ -3,7 +3,7 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 
-abstract class BaseActivity<B: ViewBinding>(//액티비티 뷰바인딩 참조 클래스1
+abstract class BaseActivity<B: ViewBinding>(//액티비티 뷰바인딩 참조 클래스12
     val bindingFactory: (LayoutInflater) -> B
 ): AppCompatActivity() {
 

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 
-abstract class BaseFragment<B: ViewBinding>: Fragment() {//프래그먼트 뷰 바인딩 참조 클래스1
+abstract class BaseFragment<B: ViewBinding>: Fragment() {//프래그먼트 뷰 바인딩 참조 클래스31
 
     private var _binding: B? = null
     val binding get() = _binding!!
