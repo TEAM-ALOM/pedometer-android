@@ -9,7 +9,7 @@ class MainActivity :  BaseActivity<ActivityMainBinding>({ ActivityMainBinding.in
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val view = binding.root
+        val view = binding.root//뷰 바인딩
         setContentView(view)
         val textStepsToday=binding.viewStepsToday// 현재 걸음 수
         val textStepsAvg=binding.viewStepsAvg// 일주일간 평균 걸음 수
