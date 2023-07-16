@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">pedometer</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="goalSteps">목표 걸음수</string>
+    <string name="oneDay">하루에</string>
+    <string name="steps">걸음</string>
+    <string name="saveChanges">변경 내용 저장</string>
+    <string name="page_title">Pedometer</string>
+</resources>
