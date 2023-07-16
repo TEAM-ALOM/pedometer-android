@@ -28,7 +28,7 @@ class Day : BaseFragment<FragmentDayBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val stepsGoal=8000//목표 걸음수
-        val stepsToday=5000//오늘 걸음수
+        val stepsToday=4000//오늘 걸음수
         val month=7//월
         val day=7//일
         textSteps=binding.viewSteps
