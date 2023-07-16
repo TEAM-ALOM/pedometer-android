@@ -18,7 +18,7 @@
         android:id="@+id/viewStepsToday"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="현재 5000 걸음"
+        android:text="현재 4000 걸음"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
