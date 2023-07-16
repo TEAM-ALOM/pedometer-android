@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragment.SettingFragment"
+    android:background="@color/deepgreen">
+
+    <TextView
+        android:id="@+id/goalStepsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="140dp"
+        android:text="@string/goalSteps"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="22sp"
+        android:textColor="@color/softwhite"
+        />
+
+    <TextView
+        android:id="@+id/oneDayText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/oneDay"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/goalStepsText"
+        android:layout_marginTop="50dp"
+        android:textSize="18sp"
+        android:textColor="@color/softwhite"
+        />
+
+    <TextView
+        android:id="@+id/stepsImage"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:background="@color/softwhite"
+        app:layout_constraintTop_toBottomOf="@+id/oneDayText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
+        android:text="10000"
+        android:textSize="70sp"
+        android:gravity="center"
+        />
+
+    <TextView
+        android:id="@+id/stepsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/steps"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stepsImage"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:textColor="@color/softwhite"
+        />
+
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/check"
+        app:layout_constraintTop_toBottomOf="@+id/stepsText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp"
+        />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
