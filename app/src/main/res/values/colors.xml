@@ -12,4 +12,9 @@
 
     <color name="yellow">#FFEB3B</color>
     <color name="red">#F44336</color>
+
+    <color name="lightpink">#FF9797</color>
+    <color name="deepgreen">#236475</color>
+    <color name="softblack">#353535</color>
+    <color name="softwhite">#FCFCFC</color>
 </resources>
