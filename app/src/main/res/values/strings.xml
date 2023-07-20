@@ -6,4 +6,5 @@
     <string name="targetNumSteps">목표 걸음수</string>
     <string name="perDay">하루에</string>
     <string name="steps">걸음</string>
+    <string name="some_description_var">some_description</string>
 </resources>
