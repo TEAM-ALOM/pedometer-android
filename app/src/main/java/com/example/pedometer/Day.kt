@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.example.pedometer.MainActivity
 import com.example.pedometer.databinding.FragmentDayBinding
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -27,8 +28,8 @@ class Day : BaseFragment<FragmentDayBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val stepsGoal=8000//목표 걸음수
-        val stepsToday=4000//오늘 걸음수
+        val stepsToday=MainActivity.GlobalVariables.stepsNow//오늘 걸음수
+        val stepsGoal=MainActivity.GlobalVariables.stepsGoal
         val month=7//월
         val day=7//일
         textSteps=binding.viewSteps
