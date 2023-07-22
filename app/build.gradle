@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.example.pedometer'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.pedometer"
-        minSdk 24
-        targetSdk 33
+        minSdk 26
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -48,7 +48,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation files('src/main/libs/samsung-health-data-1.5.0.aar')
-    // Kotlin
+    implementation "androidx.health.connect:connect-client:1.1.0-alpha02"    // Kotlin
     def nav_version = "2.6.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
