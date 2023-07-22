@@ -1,7 +1,6 @@
 package com.example.pedometer
 
 import BaseActivity
-import Day
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,6 +14,7 @@ import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.lifecycleScope
 import com.example.pedometer.databinding.ActivityMainBinding
+import com.example.pedometer.fragment.Day
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -24,13 +24,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
     object GlobalVariables {
         var stepsNow: Int = 0
-        var stepsGoal: Int = 0
+        var stepsGoal: Int = 8000
         var stepsAvg: Int = 0
 
     }
-    var stepsNow=GlobalVariables.stepsNow
-    var stepsGoal=GlobalVariables.stepsGoal
-    var stepsAvg=GlobalVariables.stepsAvg
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val view = binding.root//뷰 바인딩
@@ -39,9 +37,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         textStepsToday.setTextSize(14f)
         textStepsToday.setTextSize(28f)
 
-        textStepsToday.text = "현재 $stepsNow 걸음"//현재 걸음 수
-        textStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."//평균 걸음 수
-        supportFragmentManager.beginTransaction()// Day 프래그먼트 frame layout에 전시
+        textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"//현재 걸음 수
+        textStepsAvg.text = "일주일간 평균 ${GlobalVariables.stepsAvg} 걸음을 걸었습니다."//평균 걸음 수
+        supportFragmentManager.beginTransaction()// com.example.pedometer.fragment.Day 프래그먼트 frame layout에 전시
             .add(R.id.frameLayout, Day())
             .commit()
 
@@ -65,7 +63,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
         val healthConnectClient = HealthConnectClient.getOrCreate(this)
 // Issue operations with healthConnectClient
-
+        updateStepsNow()
 
 
     }
@@ -113,6 +111,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             if (granted.containsAll(permissions)) {
                 // 걸음 수 데이터 읽기
                 readStepsData(healthConnectClient)
+
             } else {
                 // 권한 요청
                 requestPermissions.launch(permissions)
@@ -133,11 +132,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                     timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                 )
             )
-            // The result may be null if no data is available in the time range
-            val stepCount = response[StepsRecord.COUNT_TOTAL]
-            stepsNow = (stepCount ?: 0) as Int
-            // 업데이트 된 stepsNow를 화면에 표시
-            textStepsToday.text = "현재 $stepsNow 걸음"
+            // 데이터가 없는 경우에는 null이 반환될 수 있습니다
+            val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
+            // 업데이트된 stepsNow를 화면에 표시
+            stepCount?.let {
+                GlobalVariables.stepsNow = it.toInt()
+                textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"
+
+                val dayFragment = supportFragmentManager.findFragmentById(R.id.frameLayout)
+                if (dayFragment is Day) {
+                    dayFragment.updatePieChart(GlobalVariables.stepsNow, GlobalVariables.stepsGoal)
+                }
+            }
         } catch (e: Exception) {
             // 걸음 수 데이터 읽기 실패 시 에러 처리
             e.printStackTrace()
@@ -145,4 +151,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
         }
     }
+
 }

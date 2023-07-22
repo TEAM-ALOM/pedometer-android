@@ -1,4 +1,5 @@
-
+package com.example.pedometer.fragment
+import BaseFragment
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -57,6 +58,28 @@ class Day : BaseFragment<FragmentDayBinding>() {
         pieChart.description.isEnabled = false
 
         pieChart.invalidate()
+        updatePieChart(stepsToday, stepsGoal)
     }
+    fun updatePieChart(stepsToday: Int, stepsGoal: Int) {
+        val stepsRemain = stepsGoal - stepsToday // 남은 걸음수 설정
 
+        textSteps.text = "$stepsToday / $stepsGoal"
+
+        val entries = ArrayList<PieEntry>() // 파이차트 데이터 리스트
+        entries.add(PieEntry(stepsToday.toFloat(), "이만큼 걸었어요"))
+        entries.add(PieEntry(stepsRemain.toFloat(), "이만큼 남았어요"))
+
+        val dataSet = PieDataSet(entries, "Sample Data") // 파이차트 설정
+        dataSet.colors = listOf(Color.GREEN, Color.BLUE)
+        dataSet.valueTextColor = Color.BLACK
+        dataSet.valueTextSize = 14f
+
+        val data = PieData(dataSet)
+        pieChart.data = data
+
+        pieChart.setUsePercentValues(false)
+        pieChart.description.isEnabled = false
+
+        pieChart.invalidate()
+    }
 }
