@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.pedometer.MainActivity
+import com.example.pedometer.R
 import com.example.pedometer.databinding.FragmentDayBinding
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -36,8 +37,8 @@ class Day : BaseFragment<FragmentDayBinding>() {
         textSteps=binding.viewSteps
         textDate=binding.viewDate
         val stepsRemain=stepsGoal-stepsToday//남은 걸음수 설정
-        textDate.text="$month 월 $day 일"
-        textSteps.text="$stepsToday / $stepsGoal"
+        textDate.text = getString(R.string.current_date, month.toString(), day.toString())
+        textSteps.text = getString(R.string.steps_display, stepsToday.toString(), stepsGoal.toString())
         pieChart = binding.chart
 
 

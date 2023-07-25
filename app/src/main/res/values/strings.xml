@@ -2,7 +2,8 @@
     <string name="app_name">pedometer</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="current_date">%1$s 월 %2$s 일</string>
+    <string name="steps_display">%1$s / %2$s</string>
     <string name="targetNumSteps">목표 걸음수</string>
     <string name="perDay">하루에</string>
     <string name="steps">걸음</string>
