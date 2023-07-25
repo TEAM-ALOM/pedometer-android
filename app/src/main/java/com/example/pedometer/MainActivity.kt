@@ -36,9 +36,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
         textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"//현재 걸음 수
         textStepsAvg.text = "일주일간 평균 ${GlobalVariables.stepsAvg} 걸음을 걸었습니다."//평균 걸음 수
-        supportFragmentManager.beginTransaction()// com.example.pedometer.fragment.Day 프래그먼트 frame layout에 전시
+       /* supportFragmentManager.beginTransaction()// com.example.pedometer.fragment.Day 프래그먼트 frame layout에 전시
             .add(R.id.frameLayout, Day())
-            .commit()
+            .commit()*/
 
         val providerPackageName="com.google.android.apps.healthdata"
         val availabilityStatus = HealthConnectClient.getSdkStatus(this, providerPackageName)
