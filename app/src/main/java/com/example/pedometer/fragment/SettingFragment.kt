@@ -78,7 +78,6 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             }
         }
 
-        // ImageView 클릭 이벤트 처리
 
     }
 }

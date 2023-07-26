@@ -32,7 +32,7 @@ class Day : BaseFragment<FragmentDayBinding>() {
         val stepsRemain=stepsGoal-stepsToday//남은 걸음수 설정
         textDate.text = getString(R.string.current_date, month.toString(), day.toString())
         textSteps.text = getString(R.string.steps_display, stepsToday.toString(), stepsGoal.toString())
-        var pieChart = binding.chart
+        val pieChart = binding.chart
 
 
         val entries = ArrayList<PieEntry>()//파이차트 데이터 리스트
