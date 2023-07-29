@@ -2,7 +2,9 @@
 
     import BaseActivity
     import SettingFragment
+    import android.content.Context
     import android.content.Intent
+    import android.content.SharedPreferences
     import android.net.Uri
     import android.os.Bundle
     import android.util.Log
@@ -24,14 +26,12 @@
     class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }) {
         val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
         val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
-        object GlobalVariables {
-            var stepsNow: Int = 0
-            var stepsGoal: Int = 8000
-            var stepsAvg: Int = 0
+        lateinit var sharedPreferences: SharedPreferences
 
-        }
+
 
         override fun onCreate(savedInstanceState: Bundle?) {
+            sharedPreferences = getSharedPreferences("stepsData", Context.MODE_PRIVATE)
             super.onCreate(savedInstanceState)
             val view = binding.root//뷰 바인딩
             setContentView(view)
@@ -44,8 +44,8 @@
                     .commit()
                 true
             }
-            textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"//현재 걸음 수
-            textStepsAvg.text = "일주일간 평균 ${GlobalVariables.stepsAvg} 걸음을 걸었습니다."//평균 걸음 수
+            textStepsToday.text = "현재 ${sharedPreferences.getInt("stepsToday",0)} 걸음"//현재 걸음 수
+            textStepsAvg.text = "일주일간 평균 ${sharedPreferences.getInt("stepsAvg",0)} 걸음을 걸었습니다."//평균 걸음 수
 
 
             val providerPackageName="com.google.android.apps.healthdata"
@@ -161,13 +161,8 @@
                 val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
                 // 업데이트된 stepsNow를 화면에 표시
                 stepCount?.let {
-                    GlobalVariables.stepsNow = it.toInt()
-                    textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"
-
-                    /*val dayFragment = supportFragmentManager.findFragmentById(R.id.frameLayout)//Day프래그먼트에 걸음수 최신화 해주는 코드
-                    if (dayFragment is Day) {
-                        dayFragment.updatePieChart(GlobalVariables.stepsNow, GlobalVariables.stepsGoal)
-                    }*/
+                    sharedPreferences.edit().putInt("stepsToday",it.toInt()).apply()
+                    textStepsToday.text = "현재 ${sharedPreferences.getInt("stepsToday", 0)} 걸음"
                 }
             } catch (e: Exception) {
                 // 걸음 수 데이터 읽기 실패 시 에러 처리
@@ -220,8 +215,8 @@
 
                 // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
                 stepCount?.let {
-                    GlobalVariables.stepsAvg = averageSteps
-                    textStepsAvg.text = "일주일간 평균 ${GlobalVariables.stepsAvg} 걸음을 걸었습니다."
+                    sharedPreferences.edit().putInt("stepsAvg",it.toInt()).apply()
+                    textStepsAvg.text = "일주일간 평균 ${sharedPreferences.getInt("stepsAvg",0)} 걸음을 걸었습니다."
                 }
             } catch (e: Exception) {
                 // 걸음 수 데이터 읽기 실패 시 에러 처리
