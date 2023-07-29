@@ -1,11 +1,11 @@
 package com.example.pedometer.fragment
 import BaseFragment
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.pedometer.MainActivity
 import com.example.pedometer.R
 import com.example.pedometer.databinding.FragmentDayBinding
 import com.github.mikephil.charting.data.PieData
@@ -22,9 +22,10 @@ class Day : BaseFragment<FragmentDayBinding>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val sharedPrefs = requireContext().getSharedPreferences("stepsData", Context.MODE_PRIVATE)
         super.onViewCreated(view, savedInstanceState)
-        val stepsToday=MainActivity.GlobalVariables.stepsNow//오늘 걸음수
-        val stepsGoal=MainActivity.GlobalVariables.stepsGoal
+        val stepsToday=sharedPrefs.getInt("stepsToday",0)//오늘 걸음수
+        val stepsGoal=sharedPrefs.getInt("stepsGoal",0)//목표 걸음수
         val month=7//월
         val day=7//일
         var textSteps=binding.viewSteps
