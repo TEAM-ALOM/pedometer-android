@@ -13,3 +13,16 @@
 .externalNativeBuild
 .cxx
 local.properties
+*.log
+logs
+proguard-rules.pro
+gradle.properties
+gradle-wrapper.properties
+gradlew.bat
+.idea/compiler.xml
+local.properties
+gradlew
+.idea/misc.xml
+.idea/vcs.xml
+.idea/compiler.xml
+gradle/wrapper
