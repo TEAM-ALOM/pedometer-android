@@ -1,33 +1,33 @@
 package com.example.pedometer
 
-    import BaseActivity
-    import SettingFragment
-    import android.content.Context
-    import android.content.Intent
-    import android.content.SharedPreferences
-    import android.net.Uri
-    import android.os.Bundle
-    import android.util.Log
-    import android.view.Menu
-    import android.view.MenuItem
-    import androidx.health.connect.client.HealthConnectClient
-    import androidx.health.connect.client.PermissionController
-    import androidx.health.connect.client.permission.HealthPermission
-    import androidx.health.connect.client.records.HeartRateRecord
-    import androidx.health.connect.client.records.StepsRecord
-    import androidx.health.connect.client.request.AggregateRequest
-    import androidx.health.connect.client.time.TimeRangeFilter
-    import androidx.lifecycle.lifecycleScope
-    import com.example.pedometer.databinding.ActivityMainBinding
-    import kotlinx.coroutines.launch
-    import java.time.Instant
-    import java.time.temporal.ChronoUnit
+import BaseActivity
+import SettingFragment
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.lifecycle.lifecycleScope
+import com.example.pedometer.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 
-    class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }) {
-        val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
-        val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
-        lateinit var sharedPreferences: SharedPreferences
+class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }) {
+    val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
+    val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
+    lateinit var sharedPreferences: SharedPreferences
 
 
 
