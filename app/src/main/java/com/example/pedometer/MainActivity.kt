@@ -21,6 +21,7 @@
     import com.example.pedometer.databinding.ActivityMainBinding
     import kotlinx.coroutines.launch
     import java.time.Instant
+    import java.time.temporal.ChronoUnit
 
 
     class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }) {
@@ -68,6 +69,7 @@
             }
             val healthConnectClient = HealthConnectClient.getOrCreate(this)
     // Issue operations with healthConnectClient
+            val calendarView=binding.calendarView
             updateStepsNow()
             updateStepsAverage()
 
@@ -135,7 +137,7 @@
                 val granted = healthConnectClient.permissionController.getGrantedPermissions()
                 if (granted.containsAll(permissions)) {
                     // 걸음 수 데이터 읽기
-                    readStepsData(healthConnectClient)
+                    readStepsDataToday(healthConnectClient)
 
                 } else {
                     // 권한 요청
@@ -143,25 +145,27 @@
                 }
             }
         }
-        private suspend fun readStepsData(healthConnectClient: HealthConnectClient) {
+        private suspend fun readStepsDataToday(healthConnectClient: HealthConnectClient) {
             // 현재 시간을 가져와서 endTime으로 설정
-            val endTime = Instant.now()
-            // 24시간 전의 시간을 가져와서 startTime으로 설정
-            val startTime = endTime.minusSeconds(24 * 60 * 60)
+            val endTime = Instant.now().toEpochMilli()
+            // 당일 00시를 startTime으로 설정
+            val currentDayStart = Instant.now().truncatedTo(ChronoUnit.DAYS).toEpochMilli()
 
             try {
                 // 걸음 수 데이터 읽기
                 val response = healthConnectClient.aggregate(
                     AggregateRequest(
                         metrics = setOf(StepsRecord.COUNT_TOTAL),
-                        timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                        timeRangeFilter = TimeRangeFilter.between(
+                            startTime = Instant.ofEpochMilli(currentDayStart),
+                            endTime = Instant.ofEpochMilli(endTime)
+                        )
                     )
                 )
-                // 데이터가 없는 경우에는 null이 반환될 수 있습니다
                 val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
                 // 업데이트된 stepsNow를 화면에 표시
                 stepCount?.let {
-                    sharedPreferences.edit().putInt("stepsToday",it.toInt()).apply()
+                    sharedPreferences.edit().putInt("stepsToday", it.toInt()).apply()
                     textStepsToday.text = "현재 ${sharedPreferences.getInt("stepsToday", 0)} 걸음"
                 }
             } catch (e: Exception) {
@@ -171,6 +175,10 @@
                 Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
             }
         }
+
+
+
+
 
         private fun updateStepsAverage() {
             // 걸음 수 데이터를 얻기 위해 읽기 권한 설정
@@ -184,7 +192,7 @@
                 val granted = healthConnectClient.permissionController.getGrantedPermissions()
                 if (granted.containsAll(permissions)) {
                     // 걸음 수 데이터 읽기
-                    readStepsDataAndCalculateAverage(healthConnectClient)
+                    readStepsDataAvg(healthConnectClient)
 
                 } else {
                     // 권한 요청
@@ -193,7 +201,7 @@
             }
         }
 
-        private suspend fun readStepsDataAndCalculateAverage(healthConnectClient: HealthConnectClient) {
+        private suspend fun readStepsDataAvg(healthConnectClient: HealthConnectClient) {
             // 현재 시간을 가져와서 endTime으로 설정
             val endTime = Instant.now()
             // 1주일 전의 시간을 가져와서 startTime으로 설정
@@ -207,7 +215,6 @@
                         timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                     )
                 )
-                // 데이터가 없는 경우에는 null이 반환될 수 있습니다
                 val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
 
                 // 일주일간의 평균 걸음수 계산
