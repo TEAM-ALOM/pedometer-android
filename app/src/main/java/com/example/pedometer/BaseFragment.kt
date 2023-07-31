@@ -1,4 +1,3 @@
-// BaseFragment.kt
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,7 @@ import androidx.viewbinding.ViewBinding
 
 abstract class BaseFragment<B : ViewBinding> : Fragment() {
 
-    private var _binding: B? = null
+    protected var _binding: B? = null
     val binding get() = _binding!!
 
     override fun onCreateView(

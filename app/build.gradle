@@ -48,7 +48,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation "androidx.health.connect:connect-client:1.1.0-alpha02"    // Kotlin
-    implementation 'com.applandeo:material-calendar-view:1.9.0-rc04'
+    implementation 'com.applandeo:material-calendar-view:1.7.0'
+
     def nav_version = "2.6.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
