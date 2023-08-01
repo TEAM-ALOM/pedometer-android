@@ -18,7 +18,6 @@ import com.example.pedometer.fragment.Day
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }) {
     val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
     val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
@@ -29,14 +28,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
     }
 
+    //lateinit var navController : NavController
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root//뷰 바인딩
         setContentView(view)
 
         textStepsToday.text = "현재 ${GlobalVariables.stepsNow} 걸음"//현재 걸음 수
         textStepsAvg.text = "일주일간 평균 ${GlobalVariables.stepsAvg} 걸음을 걸었습니다."//평균 걸음 수
        /* supportFragmentManager.beginTransaction()// com.example.pedometer.fragment.Day 프래그먼트 frame layout에 전시
+
             .add(R.id.frameLayout, Day())
             .commit()*/
 
@@ -96,7 +100,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         updateStepsNow()
         updateStepsAverage()
 
+
+        // Material CalendarView 설정
+        val calendarView = binding.calendarView
+
     }
+}
 
     private fun updateStepsNow() {
         // 걸음 수 데이터를 얻기 위해 읽기 권한 설정
@@ -209,5 +218,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             // 또는 다른 방식으로 로그 출력
             Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
         }
+
     }
 }
