@@ -1,5 +1,5 @@
 package com.example.pedometer
-
+//
 import BaseActivity
 import Day
 import SettingFragment
