@@ -5,9 +5,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 
-abstract class BaseFragment<B: ViewBinding>: Fragment() {//프래그먼트 뷰 바인딩 참조 클래스31
+abstract class BaseFragment<B : ViewBinding> : Fragment() {
 
-    private var _binding: B? = null
+    protected var _binding: B? = null
     val binding get() = _binding!!
 
     override fun onCreateView(
@@ -19,8 +19,10 @@ abstract class BaseFragment<B: ViewBinding>: Fragment() {//프래그먼트 뷰 �
         return binding.root
     }
 
-
-    abstract fun getFragmentBinding(inflater: LayoutInflater, container: ViewGroup?): B
+    abstract fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): B
 
     override fun onDestroyView() {
         super.onDestroyView()
