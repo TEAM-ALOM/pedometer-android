@@ -16,7 +16,7 @@ abstract class StepsDatabase : RoomDatabase() {
             if(INSTANCE == null){
                 synchronized(StepsDatabase::class){
                     INSTANCE = Room.databaseBuilder(context.applicationContext,
-                    StepsDatabase::class.java, "steps.db")
+                        StepsDatabase::class.java, "steps.db")
                         .fallbackToDestructiveMigration()
                         .build()
                 }

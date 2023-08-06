@@ -10,7 +10,6 @@ import com.example.pedometer.databinding.FragmentSettingBinding
 
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
-
     private fun showPopup(stepsGoal: Int) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("목표 걸음 수 설정")
