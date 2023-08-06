@@ -9,4 +9,6 @@ data class StepsEntity(
     var date: String="",
     var todaySteps: Int?,
     var goalSteps: Int?
+
+    //Test
 )
