@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainActivity">
+
+    <fragment
+        android:id="@+id/mainActivity"
+        android:name="com.example.pedometer.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" >
+        <action
+            android:id="@+id/action_mainActivity_to_settingFragment"
+            app:destination="@id/settingFragment" />
+        <action
+            android:id="@+id/action_mainActivity_to_day"
+            app:destination="@id/day" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.pedometer.fragment.SettingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_settingFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/day"
+        android:name="Day"
+        android:label="Day" />
+    <fragment
+        android:id="@+id/toolbarFragment"
+        android:name="com.example.pedometer.fragment.ToolbarFragment"
+        android:label="fragment_toolbar"
+        tools:layout="@layout/fragment_toolbar" >
+        <action
+            android:id="@+id/action_toolbarFragment_to_settingFragment"
+            app:destination="@id/settingFragment" />
+    </fragment>
 
 </navigation>

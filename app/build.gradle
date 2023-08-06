@@ -3,6 +3,8 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'kotlin-kapt'
+
 android {
     namespace 'com.example.pedometer'
     compileSdk 34
@@ -55,4 +57,16 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     implementation 'com.google.android.material:material:1.9.0'
+
+    // Material CalendarView 라이브러리 의존성 추가
+    implementation 'com.applandeo:material-calendar-view:1.9.0-rc04'
+
+    // ThreeTenABP 라이브러리 의존성 추가 (Java 8 날짜 및 시간 지원)
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
+
+    //Room Database
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
 }

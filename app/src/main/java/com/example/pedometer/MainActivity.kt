@@ -36,9 +36,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private var dayFragment: Day? = null // Day 프래그먼트를 저장하는 변수
 
 
+    //lateinit var navController : NavController
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root//뷰 바인딩
         setContentView(view)
         setSupportActionBar(binding.toolbar.topAppBar3) // 수정된 코드: Toolbar를 바로 설정
@@ -53,7 +57,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         sharedPreferences = getSharedPreferences("stepsData", MODE_PRIVATE)//걸음수 데이터 가져오기(앱 데이터)
         textStepsToday.text = "현재 ${sharedPreferences.getInt("stepsToday",0)} 걸음"//현재 걸음 수
         textStepsAvg.text = "일주일간 평균 ${sharedPreferences.getInt("stepsAvg",0)} 걸음을 걸었습니다."//평균 걸음 수
-
 
         val providerPackageName="com.google.android.apps.healthdata"//헬스커넥트 연결
         val availabilityStatus = HealthConnectClient.getSdkStatus(this, providerPackageName)
@@ -139,7 +142,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
         updateStepsAverage()
 
+
+        // Material CalendarView 설정
+        val calendarView = binding.calendarView
+
     }
+
     private fun onCalendarDayClicked(eventDay: EventDay) {
         lifecycleScope.launch {
             val clickedDate = eventDay.calendar
@@ -234,6 +242,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
         return 0
     }
+
 
     private fun updateStepsNow() {
         // 걸음 수 데이터를 얻기 위해 읽기 권한 설정
@@ -341,6 +350,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             // 또는 다른 방식으로 로그 출력
             Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
         }
+
     }
 
 

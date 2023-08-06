@@ -7,6 +7,7 @@
     <string name="targetNumSteps">목표 걸음수</string>
     <string name="perDay">하루에</string>
     <string name="steps">걸음</string>
+
     <string name="some_description_var">some_description</string>
     <string name="desc">Step Count</string>
     <string name="title1">Today</string>
@@ -25,4 +26,28 @@
     <string name="msg_req_enable">Please enable Samsung Health</string>
     <string name="msg_req_agree">Please agree to Samsung Health policy</string>
     <string name="msg_req_available">Please make Samsung Health available</string>
+
+    <array name="material_calendar_months_array">
+        <item>1월</item>
+        <item>2월</item>
+        <item>3월</item>
+        <item>4월</item>
+        <item>5월</item>
+        <item>6월</item>
+        <item>7월</item>
+        <item>8월</item>
+        <item>9월</item>
+        <item>10월</item>
+        <item>11월</item>
+        <item>12월</item>
+    </array>
+
+    <string name="material_calendar_monday">월</string>
+    <string name="material_calendar_tuesday">화</string>
+    <string name="material_calendar_wednesday">수</string>
+    <string name="material_calendar_thursday">목</string>
+    <string name="material_calendar_friday">금</string>
+    <string name="material_calendar_saturday">토</string>
+    <string name="material_calendar_sunday">일</string>
+
 </resources>
