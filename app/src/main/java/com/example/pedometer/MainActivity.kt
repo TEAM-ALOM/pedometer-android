@@ -21,6 +21,8 @@ import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.example.pedometer.databinding.ActivityMainBinding
+import com.example.pedometer.repository.StepRepository
+import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -34,6 +36,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false // 클릭 여부를 저장하는 변수
     private var dayFragment: Day? = null // Day 프래그먼트를 저장하는 변수
+    private lateinit var stepRepository: StepRepository
+    private lateinit var healthConnectClient: HealthConnectClient // healthConnectClient를 클래스 레벨에서 선언
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,12 +78,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             )
             return
         }
-        val healthConnectClient = HealthConnectClient.getOrCreate(this)//헬스 커넥트 연동 시작
+        healthConnectClient = HealthConnectClient.getOrCreate(this)//헬스 커넥트 연동 시작
+        stepRepository = StepRepositoryImpl(sharedPreferences, healthConnectClient)
 
-        lifecycleScope.launch {//현재 걸음 수 업데이트
-            updateStepsNow()
+        lifecycleScope.launch {
+            updateStepsNow()//현재 걸음 수 업데이트
+            updateStepsAverage()//일주일간 평균 걸음 수 업데이트
         }
-        updateStepsAverage()//일주일간 평균 걸음 수 업데이트
+
         Utils.init(this)
     }
 
@@ -136,8 +143,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         // Health Connect SDK를 사용하여 주기적으로 stepCount 정보를 업데이트
         lifecycleScope.launch {
             updateStepsNow()
+            updateStepsAverage()
         }
-        updateStepsAverage()
+
 
     }
     private fun onCalendarDayClicked(eventDay: EventDay) {
@@ -235,113 +243,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         return 0
     }
 
-    private fun updateStepsNow() {
-        // 걸음 수 데이터를 얻기 위해 읽기 권한 설정
-        val permissions = setOf(HealthPermission.getReadPermission(StepsRecord::class))
-
-        // Health Connect Client 생성
-        val healthConnectClient = HealthConnectClient.getOrCreate(this)
-
-        // 허용된 권한 확인
-        lifecycleScope.launch {
-            val granted = healthConnectClient.permissionController.getGrantedPermissions()
-            if (granted.containsAll(permissions)) {
-                // 걸음 수 데이터 읽기
-                readStepsDataToday(healthConnectClient)
-
-            } else {
-                // 권한 요청
-                requestPermissions.launch(permissions)
-            }
-        }
-    }
-    private suspend fun readStepsDataToday(healthConnectClient: HealthConnectClient) {
-        // 현재 시간을 가져와서 endTime으로 설정
-        val endTime = Instant.now().toEpochMilli()
-        // 당일 00시를 startTime으로 설정
-        val currentDayStart = Instant.now().truncatedTo(ChronoUnit.DAYS).toEpochMilli()
-
-        try {
-            // 걸음 수 데이터 읽기
-            val response = healthConnectClient.aggregate(
-                AggregateRequest(
-                    metrics = setOf(StepsRecord.COUNT_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(
-                        startTime = Instant.ofEpochMilli(currentDayStart),
-                        endTime = Instant.ofEpochMilli(endTime)
-                    )
-                )
-            )
-            val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-            // 업데이트된 stepsNow를 화면에 표시
-            stepCount?.let {
-                sharedPreferences.edit().putInt("stepsToday", it.toInt()).apply()
-                textStepsToday.text = "현재 ${sharedPreferences.getInt("stepsToday", 0)} 걸음"
-            }
-        } catch (e: Exception) {
-            // 걸음 수 데이터 읽기 실패 시 에러 처리
-            e.printStackTrace()
-            // 또는 다른 방식으로 로그 출력
-            Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
-        }
+    private suspend fun updateStepsNow() {
+        stepRepository.updateStepsNow()
+        val stepsToday = stepRepository.getStepsToday().value ?: 0
+        binding.viewStepsToday.text = "현재 $stepsToday 걸음"
     }
 
-
-
-
-
-    private fun updateStepsAverage() {
-        // 걸음 수 데이터를 얻기 위해 읽기 권한 설정
-        val permissions = setOf(HealthPermission.getReadPermission(StepsRecord::class))
-
-        // Health Connect Client 생성
-        val healthConnectClient = HealthConnectClient.getOrCreate(this)
-
-        // 허용된 권한 확인
-        lifecycleScope.launch {
-            val granted = healthConnectClient.permissionController.getGrantedPermissions()
-            if (granted.containsAll(permissions)) {
-                // 걸음 수 데이터 읽기
-                readStepsDataAvg(healthConnectClient)
-
-            } else {
-                // 권한 요청
-                requestPermissions.launch(permissions)
-            }
-        }
+    private suspend fun updateStepsAverage() {
+        stepRepository.updateStepsAverage()
+        val stepsAvg = stepRepository.getStepsAvg().value ?: 0
+        binding.viewStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."
     }
-
-    private suspend fun readStepsDataAvg(healthConnectClient: HealthConnectClient) {
-        // 현재 시간을 가져와서 endTime으로 설정
-        val endTime = Instant.now()
-        // 1주일 전의 시간을 가져와서 startTime으로 설정
-        val startTime = endTime.minusSeconds(7 * 24 * 60 * 60)
-
-        try {
-            // 걸음 수 데이터 읽기
-            val response = healthConnectClient.aggregate(
-                AggregateRequest(
-                    metrics = setOf(StepsRecord.COUNT_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
-                )
-            )
-            val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-
-            // 일주일간의 평균 걸음수 계산
-            val averageSteps = stepCount?.toFloat()?.div(7)?.toInt() ?: 0
-
-            // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
-            stepCount?.let {
-                sharedPreferences.edit().putInt("stepsAvg",it.toInt()).apply()
-                textStepsAvg.text = "일주일간 평균 ${sharedPreferences.getInt("stepsAvg",0)} 걸음을 걸었습니다."
-            }
-        } catch (e: Exception) {
-            // 걸음 수 데이터 읽기 실패 시 에러 처리
-            e.printStackTrace()
-            // 또는 다른 방식으로 로그 출력
-            Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
-        }
-    }
-
 
 }
