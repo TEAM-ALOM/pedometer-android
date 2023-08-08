@@ -11,7 +11,7 @@ import com.example.pedometer.databinding.FragmentSettingBinding
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
 
-    private fun showPopup(stepsGoal: Int) {
+    private fun showPopup(stepsGoal: Int) {//
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("목표 걸음 수 설정")
             .setMessage("목표 걸음 수가 설정되었습니다!\n목표 걸음 수: $stepsGoal")

@@ -12,8 +12,8 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
 class Day : BaseFragment<FragmentDayBinding>() {
-    private var month = 1
-    private var day = 1
+    private var month = 1//is
+    private var day = 1//is
 
 
     override fun getFragmentBinding(

@@ -29,7 +29,7 @@ import java.util.*
 
 
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
-    val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
+    val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수/
     val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
     lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false // 클릭 여부를 저장하는 변수
