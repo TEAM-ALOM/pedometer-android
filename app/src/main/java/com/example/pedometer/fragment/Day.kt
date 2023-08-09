@@ -12,8 +12,8 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
 class Day : BaseFragment<FragmentDayBinding>() {
-    private var month = 1//is
-    private var day = 1//is
+    var month=1//is
+    var day=1//is
 
 
     override fun getFragmentBinding(
@@ -54,16 +54,19 @@ class Day : BaseFragment<FragmentDayBinding>() {
         pieChart.setUsePercentValues(false)
         pieChart.description.isEnabled = false
 
-        pieChart.invalidate()
-        updatePieChart(stepsDay, stepsGoal,month,day)
+        setStepsData(stepsDay,stepsGoal,month,day)
         textDate.text = getString(R.string.current_date, month.toString(), day.toString())
         textSteps.text = getString(R.string.steps_display, stepsDay.toString(), stepsGoal.toString())
+
+        pieChart.invalidate()
     }
 
     fun updatePieChart(stepsToday: Int, stepsGoal: Int,month:Int,day: Int) {
         val stepsRemain = stepsGoal - stepsToday // 남은 걸음수 설정
 
         _binding?.viewSteps?.text = "$stepsToday / $stepsGoal"
+        _binding?.viewDate?.text = getString(R.string.current_date, month.toString(), day.toString())
+
 
         val entries = ArrayList<PieEntry>() // 파이차트 데이터 리스트
         entries.add(PieEntry(stepsToday.toFloat(), "이만큼 걸었어요"))
@@ -79,7 +82,6 @@ class Day : BaseFragment<FragmentDayBinding>() {
 
         _binding?.chart?.setUsePercentValues(false)
         _binding?.chart?.description?.isEnabled = false
-
         _binding?.chart?.invalidate()
     }
 

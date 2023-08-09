@@ -21,10 +21,12 @@ class StepRepositoryImpl(
         private val _stepsAvg = MutableLiveData<Int>()
 
         override suspend fun getStepsToday(): LiveData<Int> {
+                Log.e("StepReImpl", "오늘 걸음수 받아오기 성공")
                 return MutableLiveData(sharedPreferences.getInt("stepsToday", 0))
         }
 
         override suspend fun getStepsAvg(): LiveData<Int> {
+                Log.e("StepReImpl", "일주일 평균 걸음수 받아오기 성공")
                 return MutableLiveData(sharedPreferences.getInt("stepsAvg", 0))
         }
 
@@ -67,7 +69,6 @@ class StepRepositoryImpl(
                                 )
                         )
                         val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-                        // 업데이트된 stepsNow를 화면에 표시
                         stepCount?.let {
                                 sharedPreferences.edit().putInt("stepsToday", it.toInt()).apply()
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
