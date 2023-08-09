@@ -3,20 +3,15 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.aggregate.AggregationResult
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.request.AggregateRequest
-import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.Instant
 
 class HealthPermissionTool(private val activity: FragmentActivity) {
 
     private val healthConnectClient: HealthConnectClient = HealthConnectClient.getOrCreate(activity)
     private val providerPackageName = "com.google.android.apps.healthdata"
 
-    suspend fun checkSdkStatusAndPromptForInstallation(): Boolean {
+    suspend fun checkSdkStatusAndPromptForInstallation(): Boolean {//헬스 커넥트 앱 설치 확인
         val availabilityStatus = HealthConnectClient.getSdkStatus(activity, providerPackageName)
         return when (availabilityStatus) {
             HealthConnectClient.SDK_AVAILABLE -> true
@@ -40,15 +35,4 @@ class HealthPermissionTool(private val activity: FragmentActivity) {
         activity.startActivity(intent)
     }
 
-    suspend fun getStepsForDate(startTime: Instant, endTime: Instant): AggregationResult {
-        return healthConnectClient.aggregate(
-            AggregateRequest(
-                metrics = setOf(StepsRecord.COUNT_TOTAL),
-                timeRangeFilter = TimeRangeFilter.between(
-                    startTime = startTime,
-                    endTime = endTime
-                )
-            )
-        )
-    }
 }
