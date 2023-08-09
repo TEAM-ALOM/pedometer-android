@@ -26,7 +26,6 @@ import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -56,7 +55,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         healthPermissionTool = HealthPermissionTool(this)
         healthConnectClient = HealthConnectClient.getOrCreate(this)
 
-        stepRepository = StepRepositoryImpl(sharedPreferences, healthConnectClient) // healthConnectClient 초기화 이후에 stepRepository 초기화
+        stepRepository = StepRepositoryImpl(healthConnectClient) // healthConnectClient 초기화 이후에 stepRepository 초기화
 
 
 
@@ -100,10 +99,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             if (!healthPermissionTool.checkSdkStatusAndPromptForInstallation()) {
                 return@launch
             }
-            updateStepsData()
-
             initializeViewModels()
-
             initializeUI()
             Log.e("MainActivity", "업데이트 성공")
 
@@ -113,13 +109,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     }
     private fun onCalendarDayClicked(eventDay: EventDay) {
         lifecycleScope.launch {
-            val clickedDate = eventDay.calendar
-            val selectedDaySteps = getStepsForDate(clickedDate)
-            val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
-            val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
-
+            var clickedDate = eventDay.calendar
+            var selectedDaySteps = getStepsForDate(clickedDate)
+            var selectedMonth = clickedDate.get(Calendar.MONTH) + 1
+            var selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
 
             if (selectedDaySteps != null) {
+                Log.e("MainActivity", "걸음 수가 존재합니다.")
+
                 showDayFragment(
                     selectedDaySteps,
                     sharedPreferences.getInt("stepsGoal", 0),
@@ -128,6 +125,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 )
 
             } else {
+                Log.e("MainActivity", "걸음 수가 존재하지 않습니다.")
                 // 처리할 작업이 없는 경우는 여기에 추가
             }
 
@@ -143,22 +141,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             super.onBackPressed()
         }
     }
-    private fun showDayFragment(stepsCount: Int,stepsGoal:Int,selectedMonth: Int, selectedDay: Int) {
-        if (dayFragment == null) {
-            dayFragment = Day()
-            supportFragmentManager.beginTransaction()
-                .add(android.R.id.content, dayFragment!!)
-                .addToBackStack(null)
-                .commit()
-        } else {
-            supportFragmentManager.beginTransaction()
-                .show(dayFragment!!)
-                .commit()
-        }
-        // 걸음 수 데이터를 Day 프래그먼트로 전달합니다.
-        dayFragment?.setStepsData(stepsCount,stepsGoal, selectedMonth, selectedDay)
+    private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
+        dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
+        Log.e("MainActivity", "Day프래그먼트가 호출됩니다. $stepsCount / $stepsGoal / $selectedMonth / $selectedDay")
+        supportFragmentManager.beginTransaction()
+            .add(android.R.id.content, dayFragment!!)
+            .addToBackStack(null)
+            .commit()
         isDateClicked = true
     }
+
 
 
 
@@ -173,37 +165,44 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     }
 
 
-    private suspend fun getStepsForDate(date: Calendar): Int {//걸음수 데이터 가져오기(달력 날짜 선택용)
+    private suspend fun getStepsForDate(date: Calendar): Int {
 
-        // 당일 00시를 startTime으로 설정
-        val startTime = Instant.ofEpochMilli(date.timeInMillis).truncatedTo(ChronoUnit.DAYS)
-        // 다음날 00시를 endTime으로 설정 (excluded)
-        val endTime = Instant.ofEpochMilli(date.timeInMillis).plus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS)
+        val startTime = date.clone() as Calendar
+        startTime.set(Calendar.HOUR_OF_DAY, 6)
+        startTime.set(Calendar.MINUTE, 0)
+        startTime.set(Calendar.SECOND, 0)
+        startTime.set(Calendar.MILLISECOND, 0)
+
+        val endTime = date.clone() as Calendar
+        endTime.add(Calendar.DAY_OF_MONTH, 1) // 다음날로 이동
+        endTime.set(Calendar.HOUR_OF_DAY, 5)
+        endTime.set(Calendar.MINUTE, 59)
+        endTime.set(Calendar.SECOND, 59)
+        endTime.set(Calendar.MILLISECOND, 999)
 
         try {
-            // 걸음 수 데이터 읽기
             val response = healthConnectClient.aggregate(
                 AggregateRequest(
                     metrics = setOf(StepsRecord.COUNT_TOTAL),
                     timeRangeFilter = TimeRangeFilter.between(
-                        startTime = startTime,
-                        endTime = endTime
+                        startTime = Instant.ofEpochMilli(startTime.timeInMillis),
+                        endTime = Instant.ofEpochMilli(endTime.timeInMillis)
                     )
                 )
             )
 
             val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
+            Log.e("MainActivity", "걸음수 읽기 성공 : $stepCount")
 
             return stepCount?.toInt() ?: 0
         } catch (e: Exception) {
-            // 걸음 수 데이터 읽기 실패 시 에러 처리
             e.printStackTrace()
-            // 또는 다른 방식으로 로그 출력
             Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
         }
 
         return 0
     }
+
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         stepViewModelFactory = StepViewModelFactory(stepRepository)
@@ -211,6 +210,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             .get(StepViewModel::class.java)
 
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
+        stepViewModel.updateStepsNow()
+        stepViewModel.updateStepsAverage()
+
         stepViewModel.stepsToday.observe(this, { stepsToday ->
             binding.viewStepsToday.text = "현재 $stepsToday 걸음"
         })

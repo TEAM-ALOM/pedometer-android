@@ -1,5 +1,4 @@
 //
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,10 +10,7 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
-class Day : BaseFragment<FragmentDayBinding>() {
-    var month=1//is
-    var day=1//is
-
+class Day( val stepsCount: Int,  val stepsGoal: Int,  val selectedMonth: Int,  val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
 
     override fun getFragmentBinding(
         inflater: LayoutInflater,
@@ -24,52 +20,19 @@ class Day : BaseFragment<FragmentDayBinding>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val sharedPrefs = requireContext().getSharedPreferences("stepsData", Context.MODE_PRIVATE)
         super.onViewCreated(view, savedInstanceState)
-
-
-        val stepsDay=0//오늘 걸음수
-        val stepsGoal=0//목표 걸음수
-
-        var textSteps=binding.viewSteps
-        var textDate=binding.viewDate
-        val stepsRemain=stepsGoal-stepsDay//남은 걸음수 설정
-
-        val pieChart = binding.chart
-
-
-        val entries = ArrayList<PieEntry>()//파이차트 데이터 리스트
-        entries.add(PieEntry(stepsDay.toFloat(), "이만큼 걸었어요"))
-        entries.add(PieEntry(stepsRemain.toFloat(), "이만큼 남았어요"))
-
-        val dataSet = PieDataSet(entries, "Sample Data")//파이차트 설정
-        dataSet.colors = listOf(Color.GREEN, Color.BLUE)
-        dataSet.valueTextColor = Color.BLACK
-        dataSet.valueTextSize = 14f
-
-
-        val data = PieData(dataSet)
-        pieChart.data = data
-
-        pieChart.setUsePercentValues(false)
-        pieChart.description.isEnabled = false
-
-        setStepsData(stepsDay,stepsGoal,month,day)
-        textDate.text = getString(R.string.current_date, month.toString(), day.toString())
-        textSteps.text = getString(R.string.steps_display, stepsDay.toString(), stepsGoal.toString())
-
-        pieChart.invalidate()
+        updatePieChart()
     }
 
-    fun updatePieChart(stepsToday: Int, stepsGoal: Int,month:Int,day: Int) {
-        val stepsRemain = stepsGoal - stepsToday // 남은 걸음수 설정
+    fun updatePieChart() {
 
-        _binding?.viewSteps?.text = "$stepsToday / $stepsGoal"
-        _binding?.viewDate?.text = getString(R.string.current_date, month.toString(), day.toString())
+        val stepsRemain = stepsGoal - stepsCount // 남은 걸음수 설정
+        binding.viewSteps.text = getString(R.string.steps_percentage, stepsCount.toString(), stepsGoal.toString())
+        binding.viewDate.text = getString(R.string.current_date, selectedMonth.toString(), selectedDay.toString())
 
 
         val entries = ArrayList<PieEntry>() // 파이차트 데이터 리스트
-        entries.add(PieEntry(stepsToday.toFloat(), "이만큼 걸었어요"))
+        entries.add(PieEntry(stepsCount.toFloat(), "이만큼 걸었어요"))
         entries.add(PieEntry(stepsRemain.toFloat(), "이만큼 남았어요"))
 
         val dataSet = PieDataSet(entries, "Sample Data") // 파이차트 설정
@@ -78,16 +41,11 @@ class Day : BaseFragment<FragmentDayBinding>() {
         dataSet.valueTextSize = 28f
 
         val data = PieData(dataSet)
-        _binding?.chart?.data = data
+        binding.chart.data = data
 
-        _binding?.chart?.setUsePercentValues(false)
-        _binding?.chart?.description?.isEnabled = false
-        _binding?.chart?.invalidate()
+        binding.chart.setUsePercentValues(false)
+        binding.chart.description?.isEnabled = false
+        binding.chart.invalidate()
     }
 
-    fun setStepsData(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
-        month=selectedMonth
-        day=selectedDay
-        updatePieChart(stepsCount, stepsGoal,month,day)
-    }
 }
