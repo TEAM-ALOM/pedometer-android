@@ -20,10 +20,13 @@ class StepRepositoryImpl(
         private val _stepsToday = MutableLiveData<Int>()
         private val _stepsAvg = MutableLiveData<Int>()
 
-        override suspend fun getStepsToday(): LiveData<Int> = _stepsToday
+        override suspend fun getStepsToday(): LiveData<Int> {
+                return MutableLiveData(sharedPreferences.getInt("stepsToday", 0))
+        }
 
-        override suspend fun getStepsAvg(): LiveData<Int> = _stepsAvg
-
+        override suspend fun getStepsAvg(): LiveData<Int> {
+                return MutableLiveData(sharedPreferences.getInt("stepsAvg", 0))
+        }
 
         override suspend fun updateStepsNow() {
                 // Health Connect SDK 사용하여 현재 걸음 수 업데이트
@@ -33,6 +36,7 @@ class StepRepositoryImpl(
                 if (granted.containsAll(permissions)) {
                         readStepsDataToday()
                 }
+
         }
 
         override suspend fun updateStepsAverage() {
@@ -66,6 +70,7 @@ class StepRepositoryImpl(
                         // 업데이트된 stepsNow를 화면에 표시
                         stepCount?.let {
                                 sharedPreferences.edit().putInt("stepsToday", it.toInt()).apply()
+                                _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리
@@ -97,6 +102,7 @@ class StepRepositoryImpl(
                         // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
                         stepCount?.let {
                                 sharedPreferences.edit().putInt("stepsAvg", it.toInt()).apply()
+                                _stepsAvg.postValue(it.toInt())//라이브 데이터에 저장
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리

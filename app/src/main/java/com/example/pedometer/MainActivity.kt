@@ -3,6 +3,8 @@ package com.example.pedometer
 import BaseActivity
 import Day
 import SettingFragment
+import StepViewModel
+import StepViewModelFactory
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -16,6 +18,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
@@ -36,6 +39,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false // 클릭 여부를 저장하는 변수
     private var dayFragment: Day? = null // Day 프래그먼트를 저장하는 변수
+    private lateinit var stepViewModelFactory: StepViewModelFactory
+    private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
     private lateinit var healthConnectClient: HealthConnectClient // healthConnectClient를 클래스 레벨에서 선언
 
@@ -79,8 +84,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             return
         }
         healthConnectClient = HealthConnectClient.getOrCreate(this)//헬스 커넥트 연동 시작
+        // StepViewModelFactory 초기화
+        // stepRepository 초기화
         stepRepository = StepRepositoryImpl(sharedPreferences, healthConnectClient)
 
+        // stepViewModelFactory 초기화
+        stepViewModelFactory = StepViewModelFactory(stepRepository)
+
+        // stepViewModel 초기화
+        stepViewModel = ViewModelProvider(this, stepViewModelFactory)
+            .get(StepViewModel::class.java)
+
+        stepViewModel.stepsToday.observe(this, { stepsToday ->
+            binding.viewStepsToday.text = "현재 $stepsToday 걸음"
+        })
+
+        stepViewModel.stepsAvg.observe(this, { stepsAvg ->
+            binding.viewStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."
+        })
         lifecycleScope.launch {
             updateStepsNow()//현재 걸음 수 업데이트
             updateStepsAverage()//일주일간 평균 걸음 수 업데이트
