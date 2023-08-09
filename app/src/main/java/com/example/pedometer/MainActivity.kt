@@ -30,40 +30,31 @@ import java.util.*
 
 
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
-    val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수/
-    val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
+
     lateinit var sharedPreferences: SharedPreferences
-    private var isDateClicked = false // 클릭 여부를 저장하는 변수
-    private var dayFragment: Day? = null // Day 프래그먼트를 저장하는 변수
+    private var isDateClicked = false
+    private var dayFragment: Day? = null
     private lateinit var stepViewModelFactory: StepViewModelFactory
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
-    private lateinit var healthConnectClient: HealthConnectClient // healthConnectClient를 클래스 레벨에서 선언
+    private lateinit var healthConnectClient: HealthConnectClient
     private lateinit var healthPermissionTool: HealthPermissionTool
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-        sharedPreferences = getSharedPreferences("stepsData", MODE_PRIVATE)//걸음수 데이터 가져오기(앱 데이터)
-
-        val view = binding.root//뷰 바인딩
+        sharedPreferences = getSharedPreferences("stepsData", MODE_PRIVATE)
+        val view = binding.root
         setContentView(view)
-        setSupportActionBar(binding.toolbar.topAppBar3) // 수정된 코드: Toolbar를 바로 설정
+        setSupportActionBar(binding.toolbar.topAppBar3)
         healthPermissionTool = HealthPermissionTool(this)
-        healthConnectClient = HealthConnectClient.getOrCreate(this)
-
-        stepRepository = StepRepositoryImpl(healthConnectClient) // healthConnectClient 초기화 이후에 stepRepository 초기화
-
-
-
         lifecycleScope.launch {
             if (!healthPermissionTool.checkSdkStatusAndPromptForInstallation()) {
+                // Health SDK가 사용 불가능하거나 설치가 필요한 경우 처리
                 return@launch
             }
 
+            healthConnectClient = HealthConnectClient.getOrCreate(this@MainActivity) // SDK 초기화
+            stepRepository = StepRepositoryImpl(healthConnectClient)
 
             updateStepsData()
             initializeViewModels()
@@ -73,11 +64,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         Utils.init(this)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {//바 메뉴 생성
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.top_app_bar, menu)
         return true
     }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {// 탑바 설정 아이콘 클릭 되었을 때
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.moveToSettingIcon -> {
                 supportFragmentManager.beginTransaction()
@@ -89,9 +81,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             else -> super.onOptionsItemSelected(item)
         }
     }
+
     override fun onResume() {
         super.onResume()
-        // 이전 버튼 눌렀을 때와 날짜를 클릭하지 않았을 때 DayFragment를 숨김
         if (!isDateClicked) {
             hideDayFragment()
         }
@@ -102,11 +94,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             initializeViewModels()
             initializeUI()
             Log.e("MainActivity", "업데이트 성공")
-
         }
-
-
     }
+
     private fun onCalendarDayClicked(eventDay: EventDay) {
         lifecycleScope.launch {
             var clickedDate = eventDay.calendar
@@ -116,20 +106,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
             if (selectedDaySteps != null) {
                 Log.e("MainActivity", "걸음 수가 존재합니다.")
-
                 showDayFragment(
                     selectedDaySteps,
                     sharedPreferences.getInt("stepsGoal", 0),
                     selectedMonth,
                     selectedDay
                 )
-
             } else {
                 Log.e("MainActivity", "걸음 수가 존재하지 않습니다.")
                 // 처리할 작업이 없는 경우는 여기에 추가
             }
-
-            // 날짜가 클릭되었으므로 isDateClicked 변수를 true로 설정합니다.
             isDateClicked = true
         }
     }
