@@ -54,9 +54,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
 
             healthConnectClient = HealthConnectClient.getOrCreate(this@MainActivity) // SDK 초기화
-            stepRepository = StepRepositoryImpl(healthConnectClient)
 
-            updateStepsData()
+
             initializeViewModels()
             initializeUI()
         }
@@ -99,23 +98,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
     private fun onCalendarDayClicked(eventDay: EventDay) {
         lifecycleScope.launch {
-            var clickedDate = eventDay.calendar
-            var selectedDaySteps = getStepsForDate(clickedDate)
-            var selectedMonth = clickedDate.get(Calendar.MONTH) + 1
-            var selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
+            val clickedDate = eventDay.calendar
+            val selectedDaySteps = getStepsForDate(clickedDate)
+            val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
+            val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
 
-            if (selectedDaySteps != null) {
-                Log.e("MainActivity", "걸음 수가 존재합니다.")
-                showDayFragment(
-                    selectedDaySteps,
-                    sharedPreferences.getInt("stepsGoal", 0),
-                    selectedMonth,
-                    selectedDay
-                )
-            } else {
-                Log.e("MainActivity", "걸음 수가 존재하지 않습니다.")
-                // 처리할 작업이 없는 경우는 여기에 추가
-            }
+            Log.e("MainActivity", "걸음 수가 존재합니다.")
+            showDayFragment(
+                selectedDaySteps,
+                sharedPreferences.getInt("stepsGoal", 0),
+                selectedMonth,
+                selectedDay
+            )
             isDateClicked = true
         }
     }
@@ -167,6 +161,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         endTime.set(Calendar.MILLISECOND, 999)
 
         try {
+            healthConnectClient = HealthConnectClient.getOrCreate(this)
             val response = healthConnectClient.aggregate(
                 AggregateRequest(
                     metrics = setOf(StepsRecord.COUNT_TOTAL),
@@ -191,14 +186,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
+        stepRepository = StepRepositoryImpl(this@MainActivity)
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)
             .get(StepViewModel::class.java)
-
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
-        stepViewModel.updateStepsNow()
-        stepViewModel.updateStepsAverage()
-
+        updateStepsData()
         stepViewModel.stepsToday.observe(this, { stepsToday ->
             binding.viewStepsToday.text = "현재 $stepsToday 걸음"
         })
@@ -228,10 +221,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         })
     }
 
-    private suspend fun updateStepsData() {
+    private fun updateStepsData() {
         // 걸음 수 데이터 업데이트 작업 수행
-        stepRepository.updateStepsNow()
-        stepRepository.updateStepsAverage()
+        stepViewModel.updateStepsNow()
+        stepViewModel.updateStepsAverage()
     }
 
 

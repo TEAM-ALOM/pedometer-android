@@ -1,5 +1,6 @@
 package com.example.pedometer.repository
 
+import android.content.Context
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
@@ -12,11 +13,12 @@ import java.time.Instant
 import java.util.*
 
 class StepRepositoryImpl(
-        private val healthConnectClient: HealthConnectClient
+        context: Context
 ) : StepRepository {
+        private val healthConnectClient = HealthConnectClient.getOrCreate(context)
 
-        private val _stepsToday = MutableLiveData<Int>()
-        private val _stepsAvg = MutableLiveData<Int>()
+        private var _stepsToday = MutableLiveData<Int>()
+        private var _stepsAvg = MutableLiveData<Int>()
 
         override suspend fun getStepsToday(): LiveData<Int> {
                 updateStepsNow()
@@ -31,7 +33,6 @@ class StepRepositoryImpl(
         override suspend fun updateStepsNow() {
                 // Health Connect SDK 사용하여 현재 걸음 수 업데이트
                 val permissions = setOf(HealthPermission.getReadPermission(StepsRecord::class))
-
                 val granted = healthConnectClient.permissionController.getGrantedPermissions()
 
                 if (granted.containsAll(permissions)) {
@@ -43,7 +44,6 @@ class StepRepositoryImpl(
         override suspend fun updateStepsAverage() {
                 // Health Connect SDK 사용하여 평균 걸음 수 업데이트
                 val permissions = setOf(HealthPermission.getReadPermission(StepsRecord::class))
-
                 val granted = healthConnectClient.permissionController.getGrantedPermissions()
 
                 if (granted.containsAll(permissions)) {
@@ -75,9 +75,11 @@ class StepRepositoryImpl(
                                 )
                         )
                         val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
+
                         stepCount?.let {
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
-                                Log.e("StepRepositoryImpl", "오늘 걸음 수 데이터 읽기 성공: ${it.toInt()}")
+                                Log.e("StepRepositoryImpl", "일주일 평균 걸음 수 데이터 읽기 성공: ${_stepsToday.value}")
+
 
                         }
                 } catch (e: Exception) {
@@ -103,14 +105,13 @@ class StepRepositoryImpl(
                                 )
                         )
                         val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-
                         // 일주일간의 평균 걸음수 계산
                         val averageSteps = stepCount?.toFloat()?.div(7)?.toInt() ?: 0
 
                         // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
                         stepCount?.let {
                                 _stepsAvg.postValue(averageSteps)//라이브 데이터에 저장
-                                Log.e("StepRepositoryImpl", "일주일 평균 걸음 수 데이터 읽기 성공: ${averageSteps}")
+                                Log.e("StepRepositoryImpl", "일주일 평균 걸음 수 데이터 읽기 성공: ${_stepsAvg.value}")
 
                         }
                 } catch (e: Exception) {
