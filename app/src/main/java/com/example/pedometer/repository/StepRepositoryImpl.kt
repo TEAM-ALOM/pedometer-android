@@ -1,7 +1,6 @@
 package com.example.pedometer.repository
 
 import android.content.Context
-import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
@@ -78,15 +77,12 @@ class StepRepositoryImpl(
 
                         stepCount?.let {
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
-                                Log.e("StepRepositoryImpl", "일주일 평균 걸음 수 데이터 읽기 성공: ${_stepsToday.value}")
 
 
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리
                         e.printStackTrace()
-                        // 또는 다른 방식으로 로그 출력
-                        Log.e("StepRepositoryImpl", "걸음 수 데이터 읽기 실패: ${e.message}")
                 }
         }
 
@@ -111,14 +107,12 @@ class StepRepositoryImpl(
                         // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
                         stepCount?.let {
                                 _stepsAvg.postValue(averageSteps)//라이브 데이터에 저장
-                                Log.e("StepRepositoryImpl", "일주일 평균 걸음 수 데이터 읽기 성공: ${_stepsAvg.value}")
 
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리
                         e.printStackTrace()
                         // 또는 다른 방식으로 로그 출력
-                        Log.e("StepRepositoryImpl", "걸음 수 데이터 읽기 실패: ${e.message}")
                 }
         }
 }

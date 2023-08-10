@@ -92,7 +92,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
             initializeViewModels()
             initializeUI()
-            Log.e("MainActivity", "업데이트 성공")
         }
     }
 
@@ -103,7 +102,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
             val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
 
-            Log.e("MainActivity", "걸음 수가 존재합니다.")
             showDayFragment(
                 selectedDaySteps,
                 sharedPreferences.getInt("stepsGoal", 0),
@@ -123,7 +121,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     }
     private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
         dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
-        Log.e("MainActivity", "Day프래그먼트가 호출됩니다. $stepsCount / $stepsGoal / $selectedMonth / $selectedDay")
         supportFragmentManager.beginTransaction()
             .add(android.R.id.content, dayFragment!!)
             .addToBackStack(null)
@@ -178,7 +175,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             return stepCount?.toInt() ?: 0
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.e("MainActivity", "걸음 수 데이터 읽기 실패: ${e.message}")
         }
 
         return 0

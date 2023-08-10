@@ -1,4 +1,4 @@
-import android.util.Log
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,14 +19,12 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
     fun updateStepsNow() {
         viewModelScope.launch {
             _stepsToday.value = stepRepository.getStepsToday().value ?: 0
-            Log.e("StepViewModel", "오늘 걸음수: ${_stepsToday.value}")
         }
     }
 
     fun updateStepsAverage() {
         viewModelScope.launch {
             _stepsAvg.value = stepRepository.getStepsAvg().value ?: 0
-            Log.e("StepViewModel", "일주일 평균 걸음수: ${_stepsAvg.value}")
         }
     }
 
