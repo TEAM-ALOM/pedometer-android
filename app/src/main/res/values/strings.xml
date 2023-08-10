@@ -25,4 +25,5 @@
     <string name="msg_req_enable">Please enable Samsung Health</string>
     <string name="msg_req_agree">Please agree to Samsung Health policy</string>
     <string name="msg_req_available">Please make Samsung Health available</string>
+    <string name="steps_percentage">%1$s / %2$s</string>
 </resources>
