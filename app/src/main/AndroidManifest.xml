@@ -3,9 +3,12 @@
     package="com.example.pedometer"
     xmlns:tools="http://schemas.android.com/tools">
 
-
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,13 +22,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
-            
+
         </activity>
         <activity-alias
             android:name="ViewPermissionUsageActivity"
@@ -37,6 +42,11 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+
+        <service
+            android:name=".StepNotificationService"
+            android:exported="false" />
+
     </application>
     <queries>
         <package android:name="com.google.android.apps.healthdata" />

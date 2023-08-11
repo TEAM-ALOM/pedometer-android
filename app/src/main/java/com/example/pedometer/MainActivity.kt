@@ -6,9 +6,9 @@ import HealthPermissionTool
 import SettingFragment
 import StepViewModel
 import StepViewModelFactory
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.health.connect.client.HealthConnectClient
@@ -55,9 +55,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
             healthConnectClient = HealthConnectClient.getOrCreate(this@MainActivity) // SDK 초기화
 
-
             initializeViewModels()
             initializeUI()
+
         }
 
         Utils.init(this)
@@ -92,6 +92,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
             initializeViewModels()
             initializeUI()
+
         }
     }
 
@@ -170,8 +171,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             )
 
             val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-            Log.e("MainActivity", "걸음수 읽기 성공 : $stepCount")
-
             return stepCount?.toInt() ?: 0
         } catch (e: Exception) {
             e.printStackTrace()
@@ -190,6 +189,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         updateStepsData()
         stepViewModel.stepsToday.observe(this, { stepsToday ->
             binding.viewStepsToday.text = "현재 $stepsToday 걸음"
+            sharedPreferences.edit().putInt("stepsToday",stepsToday)
         })
 
         stepViewModel.stepsAvg.observe(this, { stepsAvg ->
@@ -215,6 +215,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 onCalendarDayClicked(eventDay)
             }
         })
+        val intent = Intent(this@MainActivity, StepNotificationService::class.java)
+        intent.putExtra("stepsToday", sharedPreferences.getInt("stepsToday",0))
+        intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
+        startService(intent)
     }
 
     private fun updateStepsData() {
