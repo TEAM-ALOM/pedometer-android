@@ -1,15 +1,22 @@
 //
 import android.app.AlertDialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.lifecycle.ViewModelProvider
 import com.example.pedometer.databinding.FragmentSettingBinding
+import com.example.pedometer.repository.StepRepository
+import com.example.pedometer.repository.StepRepositoryImpl
 
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
+    private lateinit var stepViewModelFactory: StepViewModelFactory
+    private lateinit var stepViewModel: StepViewModel
+    private lateinit var stepRepository: StepRepository
 
     private fun showPopup(stepsGoal: Int) {//
         val builder = AlertDialog.Builder(requireContext())
@@ -42,20 +49,8 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 
         personalStepsSetting.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val tstepsGoal = personalStepsSetting.text.toString().toIntOrNull()
-                if (tstepsGoal != null) {
-                    // 목표 걸음 수를 SharedPreferences에 저장
-                    with(sharedPrefs.edit()) {
-                        putInt("stepsGoal", tstepsGoal)
-                        apply()
-                    }
-
-                    // 팝업 띄우기
-                    showPopup(tstepsGoal)
-
-                    // 현재 Fragment를 닫음
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
+                val newGoal = personalStepsSetting.text.toString().toIntOrNull() ?: savedStepsGoal
+                updateGoal(newGoal,sharedPrefs)
                 true
             } else {
                 false
@@ -63,20 +58,25 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         }
 
         confirmButton.setOnClickListener {
-            val targetSteps = personalStepsSetting.text.toString().toIntOrNull()
-            if (targetSteps != null) {
-                // 목표 걸음 수를 SharedPreferences에 저장
-                with(sharedPrefs.edit()) {
-                    putInt("stepsGoal", targetSteps)
-                    apply()
-                }
-
-                // 팝업 띄우기
-                showPopup(targetSteps)
-
-                // 현재 Fragment를 닫음
-                requireActivity().supportFragmentManager.popBackStack()
+            updateGoal(savedStepsGoal,sharedPrefs)
+        }
+    }
+    private fun updateGoal(updatestepsGoal: Int, sharedPrefs: SharedPreferences) {
+        // 목표 걸음 수를 SharedPreferences에 저장
+        stepRepository = StepRepositoryImpl(requireContext())
+        stepViewModelFactory = StepViewModelFactory(stepRepository)
+        stepViewModel = ViewModelProvider(this, stepViewModelFactory)
+            .get(StepViewModel::class.java)
+        stepViewModel.updateStepsGoal(updatestepsGoal)
+        stepViewModel.stepsGoal.observe(this) { stepsGoal ->
+            with(sharedPrefs.edit()) {
+                putInt("stepsGoal", stepsGoal)
+                apply()
             }
         }
+
+        showPopup(updatestepsGoal)
+        // 현재 Fragment를 닫음
+        requireActivity().supportFragmentManager.popBackStack()
     }
 }

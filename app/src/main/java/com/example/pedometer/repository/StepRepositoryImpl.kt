@@ -12,12 +12,13 @@ import java.time.Instant
 import java.util.*
 
 class StepRepositoryImpl(
-        context: Context
+        private var context: Context
 ) : StepRepository {
         private val healthConnectClient = HealthConnectClient.getOrCreate(context)
 
         private var _stepsToday = MutableLiveData<Int>()
         private var _stepsAvg = MutableLiveData<Int>()
+        private var _stepsGoal = MutableLiveData<Int>()
 
         override suspend fun getStepsToday(): LiveData<Int> {
                 updateStepsNow()
@@ -27,6 +28,12 @@ class StepRepositoryImpl(
         override suspend fun getStepsAvg(): LiveData<Int> {
                 updateStepsAverage()
                 return _stepsAvg
+        }
+        override suspend fun getStepsGoal(): LiveData<Int> {
+                val sharedPrefs = context.getSharedPreferences("stepsData", Context.MODE_PRIVATE)
+                val stepsGoal = sharedPrefs.getInt("stepsGoal", 0)
+                _stepsGoal.value = stepsGoal
+                return _stepsGoal
         }
 
         override suspend fun updateStepsNow() {
@@ -49,6 +56,8 @@ class StepRepositoryImpl(
                         readStepsDataAvg()
                 }
         }
+
+
 
         private suspend fun readStepsDataToday() {
                 // 현재 시간을 가져와서 endTime으로 설정

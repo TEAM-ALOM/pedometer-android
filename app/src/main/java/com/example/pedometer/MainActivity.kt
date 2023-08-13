@@ -187,14 +187,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             .get(StepViewModel::class.java)
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
-        stepViewModel.stepsToday.observe(this, { stepsToday ->
+        val intent = Intent(this@MainActivity, StepNotificationService::class.java)
+        intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
+        stepViewModel.stepsToday.observe(this) { stepsToday ->
             binding.viewStepsToday.text = "현재 $stepsToday 걸음"
-            sharedPreferences.edit().putInt("stepsToday",stepsToday)
-        })
-
-        stepViewModel.stepsAvg.observe(this, { stepsAvg ->
+            intent.putExtra("stepsToday", stepsToday)
+            sharedPreferences.edit().putInt("stepsToday", stepsToday)
+        }
+        stepViewModel.stepsGoal.observe(this) { stepsGoal ->
+            intent.putExtra("stepsGoal", stepsGoal)
+            sharedPreferences.edit().putInt("stepsGoal", stepsGoal)
+        }
+        stepViewModel.stepsAvg.observe(this) { stepsAvg ->
             binding.viewStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."
-        })
+        }
+        startService(intent)
+
     }
 
 
@@ -215,10 +223,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 onCalendarDayClicked(eventDay)
             }
         })
-        val intent = Intent(this@MainActivity, StepNotificationService::class.java)
-        intent.putExtra("stepsToday", sharedPreferences.getInt("stepsToday",0))
-        intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
-        startService(intent)
+
+
     }
 
     private fun updateStepsData() {
