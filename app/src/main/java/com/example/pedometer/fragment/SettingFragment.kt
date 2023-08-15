@@ -1,4 +1,5 @@
-//
+package com.example.pedometer.fragment
+import BaseFragment
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
@@ -18,10 +19,10 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
 
-    private fun showPopup(stepsGoal: Int) {//
+    private fun showPopup(stepsGoal: Int) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("목표 걸음 수 설정")
-            .setMessage("목표 걸음 수가 설정되었습니다!\n목표 걸음 수: $stepsGoal")
+            .setMessage("목표 걸음 수가 설정 되었습니다!\n목표 걸음 수: $stepsGoal")
             .setPositiveButton("확인") { dialog, _ ->
                 dialog.dismiss()
             }
@@ -42,13 +43,14 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         val confirmButton = binding.btncheck
         val personalStepsSetting = binding.personalStepsSetting
 
-        // SharedPreferences에서 기존 저장된 값을 가져옴 (기본값: 10000)
+        // SharedPreference 기존 저장된 값을 가져옴 (기본값: 10000)
         val sharedPrefs = requireContext().getSharedPreferences("stepsData", Context.MODE_PRIVATE)
         val savedStepsGoal = sharedPrefs.getInt("stepsGoal", 10000)
         personalStepsSetting.setText(savedStepsGoal.toString())
 
         personalStepsSetting.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+
                 val newGoal = personalStepsSetting.text.toString().toIntOrNull() ?: savedStepsGoal
                 updateGoal(newGoal,sharedPrefs)
                 true

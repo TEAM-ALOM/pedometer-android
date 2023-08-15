@@ -3,6 +3,8 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'kotlin-kapt'
+
 android {
     namespace 'com.example.pedometer'
     compileSdk 34
@@ -47,12 +49,35 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-    implementation "androidx.health.connect:connect-client:1.1.0-alpha02"    // Kotlin
+    implementation "androidx.health.connect:connect-client:1.1.0-alpha03"    // Kotlin
     implementation 'com.applandeo:material-calendar-view:1.7.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
 
     def nav_version = "2.6.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
+    implementation 'com.google.android.material:material:1.9.0'
+
+    // Material CalendarView 라이브러리 의존성 추가
+    implementation 'com.applandeo:material-calendar-view:1.9.0-rc04'
+
+    // ThreeTenABP 라이브러리 의존성 추가 (Java 8 날짜 및 시간 지원)
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
+
+    //Room Database
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    // The view calendar library
+    implementation 'com.kizitonwose.calendar:view:<latest-version>'
+    // The compose calendar library
+    implementation 'com.kizitonwose.calendar:compose:<latest-version>'
+
+    //work-runtime
+    implementation "androidx.work:work-runtime:2.8.1"
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 }

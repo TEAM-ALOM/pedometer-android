@@ -1,4 +1,4 @@
-
+package com.example.pedometer
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
@@ -11,8 +11,7 @@ class HealthPermissionTool(private val activity: FragmentActivity) {//권한 설
     private val providerPackageName = "com.google.android.apps.healthdata"
 
     suspend fun checkSdkStatusAndPromptForInstallation(): Boolean {
-        val availabilityStatus = HealthConnectClient.getSdkStatus(activity, providerPackageName)
-        return when (availabilityStatus) {
+        return when (HealthConnectClient.getSdkStatus(activity, providerPackageName)) {
             HealthConnectClient.SDK_AVAILABLE -> true
             HealthConnectClient.SDK_UNAVAILABLE -> {
                 showInstallHealthConnectDialog()

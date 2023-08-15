@@ -1,4 +1,7 @@
 //
+package com.example.pedometer.fragment
+
+import BaseFragment
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,8 +13,8 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
-class Day( val stepsCount: Int,  val stepsGoal: Int,  val selectedMonth: Int,  val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
 
+class Day( private val stepsCount: Int,  private val stepsGoal: Int,  private val selectedMonth: Int,  private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
     override fun getFragmentBinding(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -24,7 +27,7 @@ class Day( val stepsCount: Int,  val stepsGoal: Int,  val selectedMonth: Int,  v
         updatePieChart()
     }
 
-    fun updatePieChart() {
+    private fun updatePieChart() {
 
         val stepsRemain = stepsGoal - stepsCount // 남은 걸음수 설정
         binding.viewSteps.text = getString(R.string.steps_percentage, stepsCount.toString(), stepsGoal.toString())
@@ -47,5 +50,4 @@ class Day( val stepsCount: Int,  val stepsGoal: Int,  val selectedMonth: Int,  v
         binding.chart.description?.isEnabled = false
         binding.chart.invalidate()
     }
-
 }

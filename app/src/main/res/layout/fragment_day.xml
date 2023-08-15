@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Day">
+    tools:context=".fragment.Day">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="00월 00일"
+            android:text="@string/_00_00"
             android:textColor="#FFFFFF"
             android:textSize="28sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="64dp"
-            android:text="4000 / 7000"
+            android:text="@string/_4000_7000"
             android:textColor="#FFFFFF"
             android:textSize="42sp"
             app:layout_constraintEnd_toEndOf="parent"

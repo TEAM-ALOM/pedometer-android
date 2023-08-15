@@ -26,7 +26,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <com.applandeo.materialcalendarview.CalendarView
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
@@ -39,7 +38,7 @@
         android:id="@+id/viewStepsToday"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="현재 4000 걸음"
+        android:text="@string/_4000"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -51,7 +50,7 @@
         android:id="@+id/viewStepsAvg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="일주일간 평균 8000걸음 걸었습니다."
+        android:text="@string/_8000"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

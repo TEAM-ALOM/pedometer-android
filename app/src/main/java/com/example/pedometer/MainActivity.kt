@@ -21,6 +21,8 @@ import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.example.pedometer.databinding.ActivityMainBinding
+import com.example.pedometer.fragment.Day
+import com.example.pedometer.fragment.SettingFragment
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
@@ -31,8 +33,7 @@ import java.util.*
 
 @Suppress("DEPRECATION")
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
-
-    lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false
     private var dayFragment: Day? = null
     private lateinit var stepViewModelFactory: StepViewModelFactory
@@ -104,6 +105,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
             val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
 
+
             showDayFragment(
                 selectedDaySteps,
                 sharedPreferences.getInt("stepsGoal", 0),
@@ -129,8 +131,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             .commit()
         isDateClicked = true
     }
-
-
 
 
     private fun hideDayFragment() {
@@ -184,8 +184,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         stepRepository = StepRepositoryImpl(this@MainActivity)
         stepViewModelFactory = StepViewModelFactory(stepRepository)
-        stepViewModel = ViewModelProvider(this, stepViewModelFactory)
-            .get(StepViewModel::class.java)
+        stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
         val intent = Intent(this@MainActivity, StepNotificationService::class.java)
@@ -218,6 +217,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             true
         }
 
+
         val calendarView: CalendarView = binding.calendarView//달력
         calendarView.setOnDayClickListener(object : OnDayClickListener {
             override fun onDayClick(eventDay: EventDay) {
@@ -233,7 +233,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         stepViewModel.updateStepsNow()
         stepViewModel.updateStepsAverage()
     }
-
-
 
 }

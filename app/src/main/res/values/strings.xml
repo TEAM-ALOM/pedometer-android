@@ -7,6 +7,7 @@
     <string name="targetNumSteps">목표 걸음수</string>
     <string name="perDay">하루에</string>
     <string name="steps">걸음</string>
+
     <string name="some_description_var">some_description</string>
     <string name="desc">Step Count</string>
     <string name="title1">Today</string>
@@ -15,7 +16,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="connect_to_shealth">Connect to Samsung Health</string>
+    <string name="connect_to_health">Connect to Samsung Health</string>
 
     <string name="notice">Notice</string>
     <string name="msg_perm_acquired">All permissions should be acquired</string>
@@ -25,9 +26,39 @@
     <string name="msg_req_enable">Please enable Samsung Health</string>
     <string name="msg_req_agree">Please agree to Samsung Health policy</string>
     <string name="msg_req_available">Please make Samsung Health available</string>
+
+    <array name="material_calendar_months_array">
+        <item>1월</item>
+        <item>2월</item>
+        <item>3월</item>
+        <item>4월</item>
+        <item>5월</item>
+        <item>6월</item>
+        <item>7월</item>
+        <item>8월</item>
+        <item>9월</item>
+        <item>10월</item>
+        <item>11월</item>
+        <item>12월</item>
+    </array>
+
+    <string name="material_calendar_monday">월</string>
+    <string name="material_calendar_tuesday">화</string>
+    <string name="material_calendar_wednesday">수</string>
+    <string name="material_calendar_thursday">목</string>
+    <string name="material_calendar_friday">금</string>
+    <string name="material_calendar_saturday">토</string>
+    <string name="material_calendar_sunday">일</string>
     <string name="steps_percentage">%1$s / %2$s</string>
+    <string name="_4000">현재 4000 걸음</string>
+    <string name="_8000">일주일간 평균 8000걸음 걸었습니다.</string>
+    <string name="_00_00">00월 00일</string>
+    <string name="_4000_7000">4000 / 7000</string>
+    <string name="steps_now">"현재 %d 걸음"</string>
+    <string name="steps_Avg">"일주일간 평균 %d 걸음 걸었습니다."</string>
     <string name="notification_title">걸음 수 알림</string>
     <string name="notification_content_text">오늘 걸음 수: %1$d\n목표 걸음 수: %2$d\n목표 달성률: %3$d%%</string>
     <string name="notification_channel_name">걸음 수 알림 채널</string>
     <string name="notification_channel_description">오늘의 걸음 수 알림을 표시하는 채널입니다!</string>
+
 </resources>
