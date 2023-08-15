@@ -1,9 +1,14 @@
 package com.example.pedometer
 //
 import BaseActivity
+import Day
+import HealthPermissionTool
+import SettingFragment
+import StepViewModel
+import StepViewModelFactory
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.health.connect.client.HealthConnectClient
@@ -52,9 +57,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
             healthConnectClient = HealthConnectClient.getOrCreate(this@MainActivity) // SDK 초기화
 
-
             initializeViewModels()
             initializeUI()
+
         }
 
         Utils.init(this)
@@ -89,6 +94,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
             initializeViewModels()
             initializeUI()
+
         }
     }
 
@@ -110,14 +116,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
     }
     @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {//이전 버튼이 눌렸을 때
+    override fun onBackPressed() = //이전 버튼이 눌렸을 때
         if (dayFragment != null && dayFragment!!.isVisible) {
             hideDayFragment()
             isDateClicked = false
         } else {
             super.onBackPressed()
         }
-    }
     private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
         dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
         supportFragmentManager.beginTransaction()
@@ -166,9 +171,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 )
             )
 
-            val stepCount = response[StepsRecord.COUNT_TOTAL]
-            Log.e("MainActivity", "걸음수 읽기 성공 : $stepCount")
-
+            val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
             return stepCount?.toInt() ?: 0
         } catch (e: Exception) {
             e.printStackTrace()
@@ -184,13 +187,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
+        val intent = Intent(this@MainActivity, StepNotificationService::class.java)
+        intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
         stepViewModel.stepsToday.observe(this) { stepsToday ->
-            binding.viewStepsToday.text = getString(R.string.steps_now, stepsToday)
+            binding.viewStepsToday.text = "현재 $stepsToday 걸음"
+            intent.putExtra("stepsToday", stepsToday)
+            sharedPreferences.edit().putInt("stepsToday", stepsToday)
         }
-
+        stepViewModel.stepsGoal.observe(this) { stepsGoal ->
+            intent.putExtra("stepsGoal", stepsGoal)
+            sharedPreferences.edit().putInt("stepsGoal", stepsGoal)
+        }
         stepViewModel.stepsAvg.observe(this) { stepsAvg ->
-            binding.viewStepsAvg.text = getString(R.string.steps_Avg, stepsAvg)
+            binding.viewStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."
         }
+        startService(intent)
+
     }
 
 
@@ -212,6 +224,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 onCalendarDayClicked(eventDay)
             }
         })
+
+
     }
 
     private fun updateStepsData() {
