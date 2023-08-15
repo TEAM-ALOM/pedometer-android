@@ -16,7 +16,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="connect_to_shealth">Connect to Samsung Health</string>
+    <string name="connect_to_health">Connect to Samsung Health</string>
 
     <string name="notice">Notice</string>
     <string name="msg_perm_acquired">All permissions should be acquired</string>
@@ -49,5 +49,12 @@
     <string name="material_calendar_friday">금</string>
     <string name="material_calendar_saturday">토</string>
     <string name="material_calendar_sunday">일</string>
+    <string name="steps_percentage">%1$s / %2$s</string>
+    <string name="_4000">현재 4000 걸음</string>
+    <string name="_8000">일주일간 평균 8000걸음 걸었습니다.</string>
+    <string name="_00_00">00월 00일</string>
+    <string name="_4000_7000">4000 / 7000</string>
+    <string name="steps_now">"현재 %d 걸음"</string>
+    <string name="steps_Avg">"일주일간 평균 %d 걸음 걸었습니다."</string>
 
 </resources>

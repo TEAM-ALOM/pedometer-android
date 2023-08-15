@@ -10,7 +10,7 @@ abstract class StepsDatabase : RoomDatabase() {
     abstract fun stepsDAO() : StepsDAO
 
     companion object{
-        var INSTANCE : StepsDatabase? = null
+        private var INSTANCE : StepsDatabase? = null
 
         fun getInstance(context: Context) : StepsDatabase? {
             if(INSTANCE == null){

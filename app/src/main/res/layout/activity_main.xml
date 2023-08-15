@@ -19,41 +19,26 @@
 
     <FrameLayout
         android:id="@+id/frameLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="12dp"
-
-        android:layout_marginTop="64dp"
-        app:layout_constraintBottom_toTopOf="@id/guideline"
+        app:layout_constraintBottom_toTopOf="@+id/viewStepsToday"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintTop_toTopOf="parent">
-
         <com.applandeo.materialcalendarview.CalendarView
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:abbreviationsBarColor="@color/babypink"
-            app:headerColor="@color/deepgreen"
-            app:headerLabelColor="@color/white"
-            app:pagesColor="@color/softwhite"
-            android:layout_marginTop="54dp"/>
+            android:layout_height="464dp"
+            android:layout_marginTop="48dp" />
+
     </FrameLayout>
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.73" />
-
 
     <TextView
         android:id="@+id/viewStepsToday"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="현재 4000 걸음"
+        android:text="@string/_4000"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,7 +50,7 @@
         android:id="@+id/viewStepsAvg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="일주일간 평균 8000걸음 걸었습니다."
+        android:text="@string/_8000"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -5,7 +5,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
-import androidx.work.Constraints
 import java.util.concurrent.TimeUnit
 
 
@@ -27,7 +26,7 @@ class MyApplication : Application() {
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            workerTag, ExistingPeriodicWorkPolicy.REPLACE, periodicWorkRequest
+            workerTag, ExistingPeriodicWorkPolicy.UPDATE, periodicWorkRequest
         )
     }
 }
