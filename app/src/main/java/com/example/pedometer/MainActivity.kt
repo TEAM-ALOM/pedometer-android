@@ -29,6 +29,7 @@ import java.time.Instant
 import java.util.*
 
 
+@Suppress("DEPRECATION")
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
 
     lateinit var sharedPreferences: SharedPreferences
@@ -112,14 +113,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             isDateClicked = true
         }
     }
-    override fun onBackPressed() {//이전 버튼이 눌렸을 때
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() = //이전 버튼이 눌렸을 때
         if (dayFragment != null && dayFragment!!.isVisible) {
             hideDayFragment()
             isDateClicked = false
         } else {
             super.onBackPressed()
         }
-    }
     private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
         dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
         supportFragmentManager.beginTransaction()
