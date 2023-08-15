@@ -26,4 +26,8 @@
     <string name="msg_req_agree">Please agree to Samsung Health policy</string>
     <string name="msg_req_available">Please make Samsung Health available</string>
     <string name="steps_percentage">%1$s / %2$s</string>
+    <string name="notification_title">걸음 수 알림</string>
+    <string name="notification_content_text">오늘 걸음 수: %1$d\n목표 걸음 수: %2$d\n목표 달성률: %3$d%%</string>
+    <string name="notification_channel_name">걸음 수 알림 채널</string>
+    <string name="notification_channel_description">오늘의 걸음 수 알림을 표시하는 채널입니다!</string>
 </resources>
