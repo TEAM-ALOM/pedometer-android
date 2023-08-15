@@ -1,4 +1,4 @@
-package com.example.pedometer
+package com.example.pedometer.Model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

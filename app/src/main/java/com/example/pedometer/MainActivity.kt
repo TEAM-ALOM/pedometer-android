@@ -12,6 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener
+import com.example.pedometer.Model.StepViewModel
+import com.example.pedometer.Model.StepViewModelFactory
+import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.databinding.ActivityMainBinding
 import com.example.pedometer.fragment.Day
 import com.example.pedometer.fragment.SettingFragment

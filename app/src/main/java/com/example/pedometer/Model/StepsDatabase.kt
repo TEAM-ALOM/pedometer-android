@@ -1,4 +1,4 @@
-package com.example.pedometer
+package com.example.pedometer.Model
 
 import android.content.Context
 import androidx.room.Database

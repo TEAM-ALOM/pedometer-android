@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.lifecycle.ViewModelProvider
 import com.example.pedometer.BaseFragment
-import com.example.pedometer.StepViewModel
-import com.example.pedometer.StepViewModelFactory
+import com.example.pedometer.Model.StepViewModel
+import com.example.pedometer.Model.StepViewModelFactory
 import com.example.pedometer.databinding.FragmentSettingBinding
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl

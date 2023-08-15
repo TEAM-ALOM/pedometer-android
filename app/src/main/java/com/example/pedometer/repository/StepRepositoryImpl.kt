@@ -19,6 +19,7 @@ class StepRepositoryImpl(//의존성 주입용
         private var _stepsToday = MutableLiveData<Int>()
         private var _stepsAvg = MutableLiveData<Int>()
         private var _stepsGoal = MutableLiveData<Int>()
+        private var _date = MutableLiveData<Int>()
 
         override suspend fun getStepsToday(): LiveData<Int> {
                 updateStepsNow()
@@ -34,6 +35,11 @@ class StepRepositoryImpl(//의존성 주입용
                 val stepsGoal = sharedPrefs.getInt("stepsGoal", 0)
                 _stepsGoal.value = stepsGoal
                 return _stepsGoal
+        }
+        override suspend fun getDate(): LiveData<Int> {
+
+                _date.value =
+                return _date
         }
 
         override suspend fun updateStepsNow() {

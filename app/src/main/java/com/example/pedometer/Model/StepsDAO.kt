@@ -1,4 +1,4 @@
-package com.example.pedometer
+package com.example.pedometer.Model
 
 import androidx.room.Dao
 import androidx.room.Delete
