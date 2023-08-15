@@ -1,20 +1,12 @@
 package com.example.pedometer
 //
-import BaseActivity
-import Day
-import HealthPermissionTool
-import SettingFragment
-import StepViewModel
-import StepViewModelFactory
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.request.AggregateRequest
-import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.applandeo.materialcalendarview.CalendarView
@@ -27,7 +19,7 @@ import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
 import kotlinx.coroutines.launch
-import java.time.Instant
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -144,42 +136,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     }
 
 
-    private suspend fun getStepsForDate(date: Calendar): Int {
+    private fun getStepsForDate(date: Calendar): Int {
+        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date.time)
+        val stepsDAO = StepsDatabase.getInstance(this)?.stepsDAO()
+        val stepsEntity = stepsDAO?.getByDate(formattedDate)
 
-        val startTime = date.clone() as Calendar
-        startTime.set(Calendar.HOUR_OF_DAY, 6)
-        startTime.set(Calendar.MINUTE, 0)
-        startTime.set(Calendar.SECOND, 0)
-        startTime.set(Calendar.MILLISECOND, 0)
-
-        val endTime = date.clone() as Calendar
-        endTime.add(Calendar.DAY_OF_MONTH, 1) // 다음날로 이동
-        endTime.set(Calendar.HOUR_OF_DAY, 5)
-        endTime.set(Calendar.MINUTE, 59)
-        endTime.set(Calendar.SECOND, 59)
-        endTime.set(Calendar.MILLISECOND, 999)
-
-        try {
-            healthConnectClient = HealthConnectClient.getOrCreate(this)
-            val response = healthConnectClient.aggregate(
-                AggregateRequest(
-                    metrics = setOf(StepsRecord.COUNT_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(
-                        startTime = Instant.ofEpochMilli(startTime.timeInMillis),
-                        endTime = Instant.ofEpochMilli(endTime.timeInMillis)
-                    )
-                )
-            )
-
-            val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
-            return stepCount?.toInt() ?: 0
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return 0
+        return stepsEntity?.todaySteps ?: 0
     }
 
+    @SuppressLint("CommitPrefEdits")
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         stepRepository = StepRepositoryImpl(this@MainActivity)
@@ -187,21 +152,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
-        val intent = Intent(this@MainActivity, StepNotificationService::class.java)
+        val intent = Intent(this@MainActivity, MyForegroundService::class.java)
         intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
         stepViewModel.stepsToday.observe(this) { stepsToday ->
-            binding.viewStepsToday.text = "현재 $stepsToday 걸음"
+            binding.viewStepsToday.text = getString(R.string.steps_now,stepsToday)
             intent.putExtra("stepsToday", stepsToday)
             sharedPreferences.edit().putInt("stepsToday", stepsToday)
+            startService(intent)
         }
         stepViewModel.stepsGoal.observe(this) { stepsGoal ->
             intent.putExtra("stepsGoal", stepsGoal)
             sharedPreferences.edit().putInt("stepsGoal", stepsGoal)
+            startService(intent)
         }
         stepViewModel.stepsAvg.observe(this) { stepsAvg ->
-            binding.viewStepsAvg.text = "일주일간 평균 $stepsAvg 걸음을 걸었습니다."
+            binding.viewStepsAvg.text = getString(R.string.steps_Avg,stepsAvg)
         }
-        startService(intent)
+
 
     }
 

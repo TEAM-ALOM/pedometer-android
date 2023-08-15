@@ -16,7 +16,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="connect_to_health">Connect to Samsung Health</string>
+    <string name="connect_to_shealth">Connect to Samsung Health</string>
 
     <string name="notice">Notice</string>
     <string name="msg_perm_acquired">All permissions should be acquired</string>
@@ -58,7 +58,7 @@
     <string name="steps_Avg">"일주일간 평균 %d 걸음 걸었습니다."</string>
     <string name="notification_title">걸음 수 알림</string>
     <string name="notification_content_text">오늘 걸음 수: %1$d\n목표 걸음 수: %2$d\n목표 달성률: %3$d%%</string>
-    <string name="notification_channel_name">걸음 수 알림 채널</string>
+    <string name="notification_channel_name">Foreground 서비스 실행 중</string>
     <string name="notification_channel_description">오늘의 걸음 수 알림을 표시하는 채널입니다!</string>
 
 </resources>

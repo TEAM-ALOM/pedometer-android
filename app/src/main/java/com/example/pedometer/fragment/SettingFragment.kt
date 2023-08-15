@@ -1,5 +1,4 @@
 package com.example.pedometer.fragment
-import BaseFragment
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.lifecycle.ViewModelProvider
+import com.example.pedometer.BaseFragment
+import com.example.pedometer.StepViewModel
+import com.example.pedometer.StepViewModelFactory
 import com.example.pedometer.databinding.FragmentSettingBinding
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
@@ -67,8 +69,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         // 목표 걸음 수를 SharedPreferences에 저장
         stepRepository = StepRepositoryImpl(requireContext())
         stepViewModelFactory = StepViewModelFactory(stepRepository)
-        stepViewModel = ViewModelProvider(this, stepViewModelFactory)
-            .get(StepViewModel::class.java)
+        stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         stepViewModel.updateStepsGoal(updatestepsGoal)
         stepViewModel.stepsGoal.observe(this) { stepsGoal ->//라이브 데이터 사용
             with(sharedPrefs.edit()) {

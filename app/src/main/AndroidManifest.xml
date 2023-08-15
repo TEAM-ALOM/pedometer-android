@@ -44,7 +44,7 @@
         </activity-alias>
 
         <service
-            android:name=".StepNotificationService"
+            android:name=".MyForegroundService"
             android:exported="false" />
 
     </application>

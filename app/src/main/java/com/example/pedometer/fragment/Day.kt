@@ -1,20 +1,18 @@
-//
 package com.example.pedometer.fragment
-
-import BaseFragment
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.pedometer.BaseFragment
 import com.example.pedometer.R
 import com.example.pedometer.databinding.FragmentDayBinding
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
+class Day(private val stepsCount: Int, private val stepsGoal: Int, private val selectedMonth: Int, private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
 
-class Day( private val stepsCount: Int,  private val stepsGoal: Int,  private val selectedMonth: Int,  private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
     override fun getFragmentBinding(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -50,4 +48,5 @@ class Day( private val stepsCount: Int,  private val stepsGoal: Int,  private va
         binding.chart.description?.isEnabled = false
         binding.chart.invalidate()
     }
+
 }

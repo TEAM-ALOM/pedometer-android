@@ -16,4 +16,7 @@ interface StepsDAO {
 
     @Delete
     fun delete(steps: StepsEntity)
+    @Query("SELECT * FROM steps WHERE date = :date")
+    fun getByDate(date: String): StepsEntity?
+
 }
