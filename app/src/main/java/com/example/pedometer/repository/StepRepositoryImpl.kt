@@ -11,7 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import java.time.Instant
 import java.util.*
 
-class StepRepositoryImpl(
+class StepRepositoryImpl(//의존성 주입용
         private var context: Context
 ) : StepRepository {
         private val healthConnectClient = HealthConnectClient.getOrCreate(context)

@@ -68,7 +68,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)
             .get(StepViewModel::class.java)
         stepViewModel.updateStepsGoal(updatestepsGoal)
-        stepViewModel.stepsGoal.observe(this) { stepsGoal ->
+        stepViewModel.stepsGoal.observe(this) { stepsGoal ->//라이브 데이터 사용
             with(sharedPrefs.edit()) {
                 putInt("stepsGoal", stepsGoal)
                 apply()

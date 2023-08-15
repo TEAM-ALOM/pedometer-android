@@ -218,7 +218,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             true
         }
 
-        val calendarView: CalendarView = binding.calendarView
+        val calendarView: CalendarView = binding.calendarView//달력
         calendarView.setOnDayClickListener(object : OnDayClickListener {
             override fun onDayClick(eventDay: EventDay) {
                 onCalendarDayClicked(eventDay)

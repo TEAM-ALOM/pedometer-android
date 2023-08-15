@@ -14,7 +14,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
-class StepNotificationService : Service() {
+class StepNotificationService : Service() {//걸음수 데이터 상태바에 알림
 
     private val NOTIFICATION_CHANNEL_ID = "StepNotificationChannel"
     private val NOTIFICATION_ID = 1
