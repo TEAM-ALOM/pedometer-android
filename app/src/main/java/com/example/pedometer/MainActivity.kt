@@ -14,6 +14,7 @@ import com.applandeo.materialcalendarview.EventDay
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.example.pedometer.Model.StepViewModel
 import com.example.pedometer.Model.StepViewModelFactory
+import com.example.pedometer.Model.StepsDAO
 import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.databinding.ActivityMainBinding
 import com.example.pedometer.fragment.Day
@@ -21,7 +22,9 @@ import com.example.pedometer.fragment.SettingFragment
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -96,20 +99,30 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private fun onCalendarDayClicked(eventDay: EventDay) {
         lifecycleScope.launch {
             val clickedDate = eventDay.calendar
-            val selectedDaySteps = getStepsForDate(clickedDate)
+            val selectedDaySteps = withContext(Dispatchers.IO) {
+                stepRepository.getByDate(
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(clickedDate.time)
+                )?.todaySteps?:0
+            }
+            val selectedGoalSteps = withContext(Dispatchers.IO) {
+                stepRepository.getByDate(
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(clickedDate.time)
+                )?.goalSteps?:0
+            }
             val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
             val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
 
-
             showDayFragment(
                 selectedDaySteps,
-                sharedPreferences.getInt("stepsGoal", 0),
+                selectedGoalSteps,
                 selectedMonth,
                 selectedDay
             )
             isDateClicked = true
         }
     }
+
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() = //이전 버튼이 눌렸을 때
         if (dayFragment != null && dayFragment!!.isVisible) {
@@ -150,11 +163,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     @SuppressLint("CommitPrefEdits")
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
-        stepRepository = StepRepositoryImpl(this@MainActivity)
+        val stepsDAO = StepsDatabase.getInstance(this@MainActivity)?.stepsDAO() // StepsDAO를 가져옴
+        val nonNullableStepsDAO: StepsDAO = stepsDAO ?: error("StepsDAO must not be null")
+        stepRepository = StepRepositoryImpl(nonNullableStepsDAO, this@MainActivity)
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
+
         val intent = Intent(this@MainActivity, MyForegroundService::class.java)
         intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
         stepViewModel.stepsToday.observe(this) { stepsToday ->

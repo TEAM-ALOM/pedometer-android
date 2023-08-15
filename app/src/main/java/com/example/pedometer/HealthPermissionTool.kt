@@ -1,12 +1,12 @@
 package com.example.pedometer
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.fragment.app.FragmentActivity
 import androidx.health.connect.client.HealthConnectClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class HealthPermissionTool(private val activity: FragmentActivity) {//권한 설정 및 SDK설치 확인
+class HealthPermissionTool(private val activity: Context) {//권한 설정 및 SDK설치 확인
 
     private val providerPackageName = "com.google.android.apps.healthdata"
 

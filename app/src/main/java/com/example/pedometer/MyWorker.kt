@@ -1,18 +1,94 @@
-package com.example.pedometer
+    package com.example.pedometer
+    import android.content.Context
+    import android.content.Intent
+    import android.util.Log
+    import androidx.health.connect.client.HealthConnectClient
+    import androidx.health.connect.client.records.StepsRecord
+    import androidx.health.connect.client.request.AggregateRequest
+    import androidx.health.connect.client.time.TimeRangeFilter
+    import androidx.work.Worker
+    import androidx.work.WorkerParameters
+    import com.example.pedometer.Model.StepsDatabase
+    import com.example.pedometer.Model.StepsEntity
+    import com.example.pedometer.repository.StepRepository
+    import com.example.pedometer.repository.StepRepositoryImpl
+    import kotlinx.coroutines.*
+    import java.text.SimpleDateFormat
+    import java.time.Instant
+    import java.util.*
 
-import android.content.Context
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+    @Suppress("DEPRECATION")
+    class MyWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
-class MyWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+        private val stepRepository: StepRepository by lazy {
+            StepRepositoryImpl(
+                StepsDatabase.getInstance(applicationContext).stepsDAO(),
+                applicationContext
+            )
+        }
 
-    // 주기적인 백그라운드 작업을 정의하고 수행하기 위한 공간
-    override fun doWork(): Result {     // 수행될 작업 구현
-        // 데이터 동기화 작업 수행
+        override fun doWork(): Result {
+            return try {
+                val currentTime = Calendar.getInstance()
+                currentTime.set(Calendar.MINUTE, 0)
+                currentTime.set(Calendar.SECOND, 0)
+                currentTime.set(Calendar.MILLISECOND, 0)
+                val startTime = currentTime.timeInMillis
+                val endTime = System.currentTimeMillis()
 
+                CoroutineScope(Dispatchers.IO).launch {
+                    val healthPermissionTool = HealthPermissionTool(applicationContext)
 
-        // 작업이 완료될 때 알림을 표시하는 코드를 추가할 수 있음.
+                    val sdkAvailable = healthPermissionTool.checkSdkStatusAndPromptForInstallation()
 
-        return Result.success()     // 작업 성공을 return
+                    if (sdkAvailable) {
+                        val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
+
+                        val response = healthConnectClient.aggregate(
+                            AggregateRequest(
+                                metrics = setOf(StepsRecord.COUNT_TOTAL),
+                                timeRangeFilter = TimeRangeFilter.between(
+                                    startTime = Instant.ofEpochMilli(startTime),
+                                    endTime = Instant.ofEpochMilli(endTime)
+                                )
+                            )
+                        )
+                        val stepCount = response[StepsRecord.COUNT_TOTAL]
+
+                        if (stepCount != null) {
+                            val stepsEntity = StepsEntity(
+                                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(startTime),
+                                todaySteps = stepCount.toInt(),
+                                goalSteps = getGoalStepsFromRepository()
+                            )
+
+                            saveStepDataToRepository(stepsEntity)
+
+                            // ForegroundService 호출하여 상태바 알림 띄우기
+                            val serviceIntent = Intent(applicationContext, MyForegroundService::class.java)
+                            serviceIntent.putExtra("stepsToday", stepsEntity.todaySteps)
+                            serviceIntent.putExtra("stepsGoal", stepsEntity.goalSteps)
+                            applicationContext.startService(serviceIntent)
+                        }
+                    }
+                }
+
+                Result.success()    // 작업 성공을 return
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Result.failure()
+            }
+        }
+
+        private suspend fun getGoalStepsFromRepository(): Int {
+            val stepsGoal = stepRepository.getStepsGoal().value?:0
+            Log.d("MyWorker", "stepsGoal: $stepsGoal")
+            return stepsGoal
+        }
+
+        private suspend fun saveStepDataToRepository(stepsEntity: StepsEntity) {
+            withContext(Dispatchers.IO) {
+                stepRepository.saveStepData(stepsEntity)
+            }
+        }
     }
-}

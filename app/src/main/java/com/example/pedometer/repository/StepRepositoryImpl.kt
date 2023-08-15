@@ -8,10 +8,14 @@ import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.pedometer.Model.StepsDAO
+import com.example.pedometer.Model.StepsEntity
 import java.time.Instant
 import java.util.*
 
+@Suppress("NAME_SHADOWING")
 class StepRepositoryImpl(//의존성 주입용
+        private val stepsDAO: StepsDAO,
         private var context: Context
 ) : StepRepository {
         private val healthConnectClient = HealthConnectClient.getOrCreate(context)
@@ -19,7 +23,9 @@ class StepRepositoryImpl(//의존성 주입용
         private var _stepsToday = MutableLiveData<Int>()
         private var _stepsAvg = MutableLiveData<Int>()
         private var _stepsGoal = MutableLiveData<Int>()
-        private var _date = MutableLiveData<Int>()
+        private var _stepByDate = MutableLiveData<Int>()
+        private var _GoalByDate = MutableLiveData<Int>()
+
 
         override suspend fun getStepsToday(): LiveData<Int> {
                 updateStepsNow()
@@ -33,14 +39,18 @@ class StepRepositoryImpl(//의존성 주입용
         override suspend fun getStepsGoal(): LiveData<Int> {
                 val sharedPrefs = context.getSharedPreferences("stepsData", Context.MODE_PRIVATE)
                 val stepsGoal = sharedPrefs.getInt("stepsGoal", 0)
-                _stepsGoal.value = stepsGoal
+                _stepsGoal.postValue(stepsGoal)
                 return _stepsGoal
         }
-        override suspend fun getDate(): LiveData<Int> {
-
-                _date.value =
-                return _date
+        override suspend fun saveStepData(stepsEntity: StepsEntity) {
+                stepsDAO.insert(stepsEntity)
         }
+
+
+        override suspend fun getByDate(date: String): StepsEntity? {
+                return stepsDAO.getByDate(date)
+        }
+
 
         override suspend fun updateStepsNow() {
                 // Health Connect SDK 사용하여 현재 걸음 수 업데이트
@@ -88,7 +98,7 @@ class StepRepositoryImpl(//의존성 주입용
                                         )
                                 )
                         )
-                        val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
+                        val stepCount = response[StepsRecord.COUNT_TOTAL]
 
                         stepCount?.let {
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
@@ -115,7 +125,7 @@ class StepRepositoryImpl(//의존성 주입용
                                         timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                                 )
                         )
-                        val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
+                        val stepCount = response[StepsRecord.COUNT_TOTAL]
                         // 일주일간의 평균 걸음수 계산
                         val averageSteps = stepCount?.toFloat()?.div(7)?.toInt() ?: 0
 

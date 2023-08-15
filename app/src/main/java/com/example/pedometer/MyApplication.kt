@@ -26,6 +26,7 @@ class MyApplication : Application() {
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+
             workerTag, ExistingPeriodicWorkPolicy.UPDATE, periodicWorkRequest
         )
     }

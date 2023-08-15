@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.pedometer.BaseFragment
 import com.example.pedometer.Model.StepViewModel
 import com.example.pedometer.Model.StepViewModelFactory
+import com.example.pedometer.Model.StepsDAO
+import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.databinding.FragmentSettingBinding
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
@@ -67,7 +69,9 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
     }
     private fun updateGoal(updatestepsGoal: Int, sharedPrefs: SharedPreferences) {
         // 목표 걸음 수를 SharedPreferences에 저장
-        stepRepository = StepRepositoryImpl(requireContext())
+        val stepsDAO = StepsDatabase.getInstance(requireContext())?.stepsDAO() // StepsDAO를 가져옴
+        val nonNullableStepsDAO: StepsDAO = stepsDAO ?: error("StepsDAO must not be null")
+        stepRepository = StepRepositoryImpl(nonNullableStepsDAO, requireContext())
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         stepViewModel.updateStepsGoal(updatestepsGoal)
