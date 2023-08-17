@@ -1,21 +1,27 @@
 package com.example.pedometer
 //
+
 import BaseActivity
 import Day
 import SettingFragment
+import android.R
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
@@ -29,11 +35,15 @@ import java.util.*
 
 
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
+
     val textStepsToday by lazy { binding.viewStepsToday } // 현재 걸음 수
     val textStepsAvg by lazy { binding.viewStepsAvg } // 일주일간 평균 걸음 수
     lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false // 클릭 여부를 저장하는 변수
     private var dayFragment: Day? = null // Day 프래그먼트를 저장하는 변수
+
+    lateinit var viewModel: MainViewModel   // ViewModel 사용
+    lateinit var viewModelFactory: MainViewModelFactory
 
 
     //lateinit var navController : NavController
@@ -45,6 +55,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root//뷰 바인딩
         setContentView(view)
+
+        viewModelFactory = MainViewModelFactory(5000)
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)  // ViewModel 사용 준비
+
         setSupportActionBar(binding.toolbar.topAppBar3) // 수정된 코드: Toolbar를 바로 설정
         val moveToSettingIcon = binding.toolbar.topAppBar3.menu.findItem(R.id.moveToSettingIcon)
         moveToSettingIcon?.setOnMenuItemClickListener {
@@ -83,6 +97,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
         updateStepsAverage()//일주일간 평균 걸음 수 업데이트
         Utils.init(this)
+
+        val events: MutableList<EventDay> = ArrayList()
+
+        val calendar = Calendar.getInstance()
+
+        //or if you want to specify event label color
+        events.add(EventDay(calendar, R.drawable.check, Color.parseColor("#228B22")))
+
+        val calendarView = findViewById<View>(R.id.calendarView) as CalendarView
+        calendarView.setEvents(events)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {//바 메뉴 생성

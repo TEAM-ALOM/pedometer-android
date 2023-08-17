@@ -32,8 +32,8 @@ class MyForegroundService : Service() {
         // 알림 생성을 위한 Builder 객체 생성
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Test :: Foreground 서비스 실행 중")
-            .setContentText("Test :: 주기적인 작업을 수행 중")
+            .setContentTitle("걸음 수 알림")
+            .setContentText("오늘 걸음 수: {}, 목표 걸음 수: {}, 목표 달성률: {}")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         // Android 8.0 (API 레벨 26) 이상부터는 채널을 설정해야 함.
