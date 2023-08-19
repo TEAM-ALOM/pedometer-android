@@ -68,22 +68,22 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         }
     }
     private fun updateGoal(updatestepsGoal: Int, sharedPrefs: SharedPreferences) {
-        // 목표 걸음 수를 SharedPreferences에 저장
-        val stepsDAO = StepsDatabase.getInstance(requireContext())?.stepsDAO() // StepsDAO를 가져옴
+        val stepsDAO = StepsDatabase.getInstance(requireContext())?.stepsDAO()
         val nonNullableStepsDAO: StepsDAO = stepsDAO ?: error("StepsDAO must not be null")
         stepRepository = StepRepositoryImpl(nonNullableStepsDAO, requireContext())
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         stepViewModel.updateStepsGoal(updatestepsGoal)
-        stepViewModel.stepsGoal.observe(this) { stepsGoal ->//라이브 데이터 사용
+        stepViewModel.stepsGoal.observe(viewLifecycleOwner) { stepsGoal ->
             with(sharedPrefs.edit()) {
                 putInt("stepsGoal", stepsGoal)
                 apply()
             }
+            val updatedGoal = sharedPrefs.getInt("stepsGoal", 0)
+            showPopup(updatedGoal)
         }
-
-        showPopup(updatestepsGoal)
         // 현재 Fragment를 닫음
         requireActivity().supportFragmentManager.popBackStack()
     }
+
 }

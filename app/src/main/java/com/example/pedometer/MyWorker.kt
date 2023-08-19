@@ -28,6 +28,7 @@
         }
 
         override fun doWork(): Result {
+            Log.d("MyWorker", "Do work")
             return try {
                 val currentTime = Calendar.getInstance()
                 currentTime.set(Calendar.MINUTE, 0)
@@ -81,10 +82,20 @@
         }
 
         private suspend fun getGoalStepsFromRepository(): Int {
-            val stepsGoal = stepRepository.getStepsGoal().value?:0
-            Log.d("MyWorker", "stepsGoal: $stepsGoal")
-            return stepsGoal
+            val stepsGoal = stepRepository.getStepsGoal().value
+            val sharedPreferences = applicationContext.getSharedPreferences("stepsData", Context.MODE_PRIVATE)
+            val storedStepsGoal = sharedPreferences.getInt("stepsGoal", 0)
+
+            // 만약 LiveData에서 가져온 값이 0인 경우에는 SharedPreference 값으로 대체
+            return if (stepsGoal != null && stepsGoal > 0) {
+                Log.d("MyWorker", "stepsGoal: $stepsGoal")
+                stepsGoal
+            } else {
+                Log.d("MyWorker", "Using stored stepsGoal: $storedStepsGoal")
+                storedStepsGoal
+            }
         }
+
 
         private suspend fun saveStepDataToRepository(stepsEntity: StepsEntity) {
             withContext(Dispatchers.IO) {
