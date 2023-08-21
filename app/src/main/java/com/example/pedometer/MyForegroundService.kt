@@ -28,6 +28,7 @@ class MyForegroundService : Service() {//걸음수 데이터 상태바에 알림
         val stepsToday = intent?.getIntExtra("stepsToday", 0) ?: 0
         val stepsGoal = intent?.getIntExtra("stepsGoal", 0) ?: 0
         val stepsPercent = if (stepsGoal > 0) (stepsToday.toDouble() / stepsGoal.toDouble() * 100).toInt() else 0
+
         val notificationContent = getString(
             R.string.notification_content_text,
             stepsToday,
@@ -35,15 +36,13 @@ class MyForegroundService : Service() {//걸음수 데이터 상태바에 알림
             stepsPercent
         )
 
-
         val notificationIntent = Intent(this, MainActivity::class.java)
-        notificationIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notification = buildNotification(notificationContent, pendingIntent)
 
         showNotification(notification)
-        startForeground(notificationID, notification.build())
+
         return START_NOT_STICKY
     }
 

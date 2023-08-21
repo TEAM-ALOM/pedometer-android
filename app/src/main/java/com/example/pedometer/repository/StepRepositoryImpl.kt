@@ -1,6 +1,7 @@
 package com.example.pedometer.repository
 
 import android.content.Context
+import android.icu.text.SimpleDateFormat
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
@@ -8,14 +9,12 @@ import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.pedometer.Model.StepsDAO
+import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.Model.StepsEntity
 import java.time.Instant
 import java.util.*
 
-@Suppress("NAME_SHADOWING")
 class StepRepositoryImpl(//의존성 주입용
-        private val stepsDAO: StepsDAO,
         private var context: Context
 ) : StepRepository {
         private val healthConnectClient = HealthConnectClient.getOrCreate(context)
@@ -23,9 +22,7 @@ class StepRepositoryImpl(//의존성 주입용
         private var _stepsToday = MutableLiveData<Int>()
         private var _stepsAvg = MutableLiveData<Int>()
         private var _stepsGoal = MutableLiveData<Int>()
-        private var _stepByDate = MutableLiveData<Int>()
-        private var _GoalByDate = MutableLiveData<Int>()
-
+        private var _date = MutableLiveData<Int>()
 
         override suspend fun getStepsToday(): LiveData<Int> {
                 updateStepsNow()
@@ -39,18 +36,14 @@ class StepRepositoryImpl(//의존성 주입용
         override suspend fun getStepsGoal(): LiveData<Int> {
                 val sharedPrefs = context.getSharedPreferences("stepsData", Context.MODE_PRIVATE)
                 val stepsGoal = sharedPrefs.getInt("stepsGoal", 0)
-                _stepsGoal.postValue(stepsGoal)
+                _stepsGoal.value = stepsGoal
                 return _stepsGoal
         }
-        override suspend fun saveStepData(stepsEntity: StepsEntity) {
-                stepsDAO.insert(stepsEntity)
+        override suspend fun getDate(): LiveData<Int> {
+
+                _date.value =
+                return _date
         }
-
-
-        override suspend fun getByDate(date: String): StepsEntity? {
-                return stepsDAO.getByDate(date)
-        }
-
 
         override suspend fun updateStepsNow() {
                 // Health Connect SDK 사용하여 현재 걸음 수 업데이트
@@ -98,10 +91,22 @@ class StepRepositoryImpl(//의존성 주입용
                                         )
                                 )
                         )
-                        val stepCount = response[StepsRecord.COUNT_TOTAL]
+                        val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
 
                         stepCount?.let {
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
+
+                                val date = Calendar.getInstance().time
+                                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+                                val stepsEntity = StepsEntity(  // Room Database에 오늘의 날짜. 걸음수, 목표걸음수 저장
+                                        date = formattedDate,
+                                        todaySteps = it.toInt(),
+                                        goalSteps = getStepsGoal().value
+                                )
+
+                                // Room 데이터베이스에 데이터 저장
+                                val stepsDAO = StepsDatabase.getInstance(context)?.stepsDAO()
+                                stepsDAO?.insert(stepsEntity)
 
 
                         }
@@ -125,7 +130,7 @@ class StepRepositoryImpl(//의존성 주입용
                                         timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
                                 )
                         )
-                        val stepCount = response[StepsRecord.COUNT_TOTAL]
+                        val stepCount = response[StepsRecord.COUNT_TOTAL] as Long?
                         // 일주일간의 평균 걸음수 계산
                         val averageSteps = stepCount?.toFloat()?.div(7)?.toInt() ?: 0
 
