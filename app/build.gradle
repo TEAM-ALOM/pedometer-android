@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.applandeo:material-calendar-view:1.7.0'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
 
-    def nav_version = "2.6.0"
+    def nav_version = "2.7.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
@@ -79,4 +79,10 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    // Coroutine
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+
+    // ViewModelScope
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 }

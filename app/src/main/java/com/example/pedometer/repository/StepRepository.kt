@@ -9,4 +9,5 @@ interface StepRepository {//걸음수 레포지토리
     suspend fun getStepsGoal(): LiveData<Int>
     suspend fun updateStepsNow()
     suspend fun updateStepsAverage()
+
 }

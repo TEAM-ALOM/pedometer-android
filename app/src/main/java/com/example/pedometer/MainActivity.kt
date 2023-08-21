@@ -110,6 +110,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             isDateClicked = true
         }
     }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() = //이전 버튼이 눌렸을 때
         if (dayFragment != null && dayFragment!!.isVisible) {
@@ -177,6 +178,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
 
     private fun initializeUI() {
+
         // UI 초기화 작업 수행
         val moveToSettingIcon = binding.toolbar.topAppBar3.menu.findItem(R.id.moveToSettingIcon)
         moveToSettingIcon?.setOnMenuItemClickListener {
