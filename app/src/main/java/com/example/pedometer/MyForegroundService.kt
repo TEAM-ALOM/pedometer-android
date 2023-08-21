@@ -37,7 +37,7 @@ class MyForegroundService : Service() {//걸음수 데이터 상태바에 알림
         )
 
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notification = buildNotification(notificationContent, pendingIntent)
 
