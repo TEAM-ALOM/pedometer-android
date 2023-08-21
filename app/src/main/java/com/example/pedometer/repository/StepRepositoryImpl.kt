@@ -1,7 +1,6 @@
 package com.example.pedometer.repository
 
 import android.content.Context
-import android.icu.text.SimpleDateFormat
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
@@ -9,13 +8,14 @@ import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.pedometer.Model.StepsDatabase
-import com.example.pedometer.Model.StepsEntity
+import com.example.pedometer.Model.StepsDAO
 import java.time.Instant
 import java.util.*
 
-class StepRepositoryImpl(//의존성 주입용
-        private var context: Context
+@Suppress("UNREACHABLE_CODE")
+class StepRepositoryImpl(
+        private val context: Context,
+        private val stepsDAO: StepsDAO
 ) : StepRepository {
         private val healthConnectClient = HealthConnectClient.getOrCreate(context)
 
@@ -81,9 +81,7 @@ class StepRepositoryImpl(//의존성 주입용
                 try {
                         // 걸음 수 데이터 읽기
                         val response = healthConnectClient.aggregate(
-
                                 AggregateRequest(
-
                                         metrics = setOf(StepsRecord.COUNT_TOTAL),
                                         timeRangeFilter = TimeRangeFilter.between(
                                                 startTime = Instant.ofEpochMilli(currentDayStart),
@@ -95,20 +93,6 @@ class StepRepositoryImpl(//의존성 주입용
 
                         stepCount?.let {
                                 _stepsToday.postValue(it.toInt())//라이브 데이터에 저장
-
-                                val date = Calendar.getInstance().time
-                                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
-                                val stepsEntity = StepsEntity(  // Room Database에 오늘의 날짜. 걸음수, 목표걸음수 저장
-                                        date = formattedDate,
-                                        todaySteps = it.toInt(),
-                                        goalSteps = getStepsGoal().value
-                                )
-
-                                // Room 데이터베이스에 데이터 저장
-                                val stepsDAO = StepsDatabase.getInstance(context)?.stepsDAO()
-                                stepsDAO?.insert(stepsEntity)
-
-
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리
@@ -137,7 +121,6 @@ class StepRepositoryImpl(//의존성 주입용
                         // 업데이트된 stepsNow와 stepsAvg를 화면에 표시
                         stepCount?.let {
                                 _stepsAvg.postValue(averageSteps)//라이브 데이터에 저장
-
                         }
                 } catch (e: Exception) {
                         // 걸음 수 데이터 읽기 실패 시 에러 처리
@@ -145,4 +128,5 @@ class StepRepositoryImpl(//의존성 주입용
                         // 또는 다른 방식으로 로그 출력
                 }
         }
+
 }

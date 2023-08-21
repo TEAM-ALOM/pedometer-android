@@ -1,6 +1,7 @@
 package com.example.pedometer.fragment
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,12 +14,12 @@ import com.example.pedometer.Model.StepViewModel
 import com.example.pedometer.Model.StepViewModelFactory
 import com.example.pedometer.Model.StepsDAO
 import com.example.pedometer.Model.StepsDatabase
+import com.example.pedometer.MyForegroundService
 import com.example.pedometer.databinding.FragmentSettingBinding
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
 
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
-
     private lateinit var stepViewModelFactory: StepViewModelFactory
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
@@ -68,9 +69,9 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
         }
     }
     private fun updateGoal(updatestepsGoal: Int, sharedPrefs: SharedPreferences) {
-        val stepsDAO = StepsDatabase.getInstance(requireContext())?.stepsDAO()
-        val nonNullableStepsDAO: StepsDAO = stepsDAO ?: error("StepsDAO must not be null")
-        stepRepository = StepRepositoryImpl(nonNullableStepsDAO, requireContext())
+        val stepsDAO = StepsDatabase.getInstance(requireContext()).stepsDAO()
+        val nonNullableStepsDAO: StepsDAO = stepsDAO
+        stepRepository = StepRepositoryImpl(requireContext(), stepsDAO)
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         stepViewModel.updateStepsGoal(updatestepsGoal)
@@ -81,8 +82,10 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
             }
             val updatedGoal = sharedPrefs.getInt("stepsGoal", 0)
             showPopup(updatedGoal)
+            val intent = Intent(requireContext(), MyForegroundService::class.java)
+            intent.putExtra("stepsGoal", updatedGoal)
         }
-        // 현재 Fragment를 닫음
+
         requireActivity().supportFragmentManager.popBackStack()
     }
 

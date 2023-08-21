@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
+import java.util.*
 
 @Dao
 interface StepsDAO {
@@ -17,6 +18,6 @@ interface StepsDAO {
     @Delete
     fun delete(steps: StepsEntity)
     @Query("SELECT * FROM steps WHERE date = :date")
-    fun getByDate(date: String): StepsEntity?
+    fun getByDate(date: Long): StepsEntity?
 
 }

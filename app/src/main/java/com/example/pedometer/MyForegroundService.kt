@@ -101,4 +101,5 @@ class MyForegroundService : Service() {//걸음수 데이터 상태바에 알림
             NotificationManagerCompat.from(this).notify(notificationID, notificationWithoutPermission.build())
         }
     }
+
 }

@@ -18,13 +18,7 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {/
         get() = _stepsAvg
     val stepsGoal: LiveData<Int>
         get() = _stepsGoal
-    suspend fun saveStepData(stepsEntity: StepsEntity) {
-        stepRepository.saveStepData(stepsEntity)
-    }
 
-    suspend fun getByDate(date: String): StepsEntity? {
-        return stepRepository.getByDate(date)
-    }
 
     fun updateStepsNow() {
         viewModelScope.launch {

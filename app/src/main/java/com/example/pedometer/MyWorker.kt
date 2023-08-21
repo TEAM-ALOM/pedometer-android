@@ -3,48 +3,86 @@ package com.example.pedometer
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
-import java.util.concurrent.TimeUnit
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.work.*
-import com.applandeo.materialcalendarview.CalendarView
-import com.applandeo.materialcalendarview.EventDay
 import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.Model.StepsEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.Instant
 import java.util.*
+import java.util.concurrent.TimeUnit
 
-class MyWorker(context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
+class MyWorker(context: Context, workerParameters: WorkerParameters) : CoroutineWorker(context, workerParameters) {
 
     // 주기적인 백그라운드 작업을 정의하고 수행하기 위한 공간
-    override fun doWork(): Result {     // 수행될 작업 구현
-        // 데이터 동기화 작업 수행
+    override suspend fun doWork(): Result { // 코루틴을 사용하여 suspend 함수로 변경(백그라운드에서 헬스커넥트 사용하기 위함)
+        return try {
+            val date = Calendar.getInstance().time
+            val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+            val stepsEntity = StepsEntity(
+                date = formattedDate,
+                todaySteps = getStepsToday(applicationContext).value,
+                goalSteps = getStepsGoal(applicationContext).value
+            )
 
-        val date = Calendar.getInstance().time
-        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
-        val stepsEntity = StepsEntity(
-            date = formattedDate,
-            todaySteps = getStepsToday().value,
-            goalSteps = getStepsGoal().value
-        )
+            // 백그라운드 스레드에서 데이터베이스에 접근하여 저장
+            val stepsDAO = StepsDatabase.getInstance(applicationContext).stepsDAO()
+            CoroutineScope(Dispatchers.IO).launch {
+                stepsDAO.insert(stepsEntity)
+            }
 
-        // Room Database에 데이터 저장
-        val stepsDAO = StepsDatabase.getInstance(applicationContext)?.stepsDAO()
-        stepsDAO?.insert(stepsEntity)
-
-        return Result.success()     // 작업 성공을 return
-
-
+            Result.success() // 작업 성공을 return
+        } catch (e: Exception) {
+            Result.failure()
+        }
     }
 
-    private fun getStepsToday(): LiveData<Int> {
-        // 현재 걸음 수를 얻는 코드 작성
-        // LiveData<Int>를 반환
+    private suspend fun getStepsToday(applicationContext: Context): LiveData<Int> {
+        val healthConnectClient = HealthConnectClient.getOrCreate(applicationContext)
+        val permissions = setOf(HealthPermission.getReadPermission(StepsRecord::class))
+        val granted = healthConnectClient.permissionController.getGrantedPermissions()
 
+        if (granted.containsAll(permissions)) {
+            val startTime = Calendar.getInstance()
+            startTime.set(Calendar.HOUR_OF_DAY, 0)
+            startTime.set(Calendar.MINUTE, 0)
+            startTime.set(Calendar.SECOND, 0)
+            startTime.set(Calendar.MILLISECOND, 0)
+            val currentDayStart = startTime.timeInMillis
+            val endTime = Instant.now().toEpochMilli()
+
+            try {
+                val response = healthConnectClient.aggregate(
+                    AggregateRequest(
+                        metrics = setOf(StepsRecord.COUNT_TOTAL),
+                        timeRangeFilter = TimeRangeFilter.between(
+                            startTime = Instant.ofEpochMilli(currentDayStart),
+                            endTime = Instant.ofEpochMilli(endTime)
+                        )
+                    )
+                )
+                val stepCount = response[StepsRecord.COUNT_TOTAL]
+                return MutableLiveData(stepCount?.toInt() ?: 0)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        return MutableLiveData(0)
     }
 
-    private fun getStepsGoal(): LiveData<Int> {
-        // 목표 걸음 수를 얻는 코드 작성
-        // LiveData<Int>를 반환
-
+    private fun getStepsGoal(applicationContext: Context): LiveData<Int> {
+        val sharedPrefs = applicationContext.getSharedPreferences("stepsData", Context.MODE_PRIVATE)
+        val stepsGoal = sharedPrefs.getInt("stepsGoal", 0)
+        return MutableLiveData(stepsGoal)
     }
 
     fun scheduleDailyWork(context: Context) {
