@@ -22,7 +22,7 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Worker(co
         val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
         val stepsEntity = StepsEntity(
             date = formattedDate,
-            todaySteps = getStepsToday(),
+            todaySteps = getStepsToday().value,
             goalSteps = getStepsGoal().value
         )
 
