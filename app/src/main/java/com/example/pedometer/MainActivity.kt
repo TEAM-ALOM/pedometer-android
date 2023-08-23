@@ -168,11 +168,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         val intent = Intent(this@MainActivity, MyForegroundService::class.java)
         stepViewModel.stepsToday.observe(this) { stepsToday ->
             binding.viewStepsToday.text = getString(R.string.steps_now,stepsToday)
-            sharedPreferences.edit().putInt("stepsToday", stepsToday)
-        }
-        stepViewModel.stepsGoal.observe(this) { stepsGoal ->
-            sharedPreferences.edit().putInt("stepsGoal", stepsGoal)
-
+            with(sharedPreferences.edit()) {
+                putInt("stepsToday", stepsToday)
+                apply()
+            }
         }
         stepViewModel.stepsAvg.observe(this) { stepsAvg ->
             binding.viewStepsAvg.text = getString(R.string.steps_Avg,stepsAvg)

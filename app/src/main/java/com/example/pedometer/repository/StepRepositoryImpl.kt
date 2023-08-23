@@ -73,7 +73,7 @@ class StepRepositoryImpl(
                 val endTime = Instant.now().toEpochMilli()
                 // 당일 00시를 startTime으로 설정
                 val startTime = Calendar.getInstance()
-                startTime.set(Calendar.HOUR_OF_DAY, 6)
+                startTime.set(Calendar.HOUR_OF_DAY, 0)
                 startTime.set(Calendar.MINUTE, 0)
                 startTime.set(Calendar.SECOND, 0)
                 startTime.set(Calendar.MILLISECOND, 0)

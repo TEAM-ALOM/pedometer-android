@@ -112,7 +112,6 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Coroutine
         targetTime.set(Calendar.MINUTE, 59)
         targetTime.set(Calendar.SECOND, 0)
         targetTime.set(Calendar.MILLISECOND, 0)
-
         return targetTime.timeInMillis - currentTime.timeInMillis
     }
 }
