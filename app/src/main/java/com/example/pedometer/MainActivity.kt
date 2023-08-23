@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.health.connect.client.HealthConnectClient
@@ -210,6 +211,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
 
         val calendarView: CalendarView = binding.calendarView//달력
+        lifecycleScope.launch {
+            stepViewModel.updateCalendarIcons(calendarView)
+            Log.e("MainActivity","Color status for steps")
+        }
         calendarView.setOnDayClickListener(object : OnDayClickListener {
             override fun onDayClick(eventDay: EventDay) {
                 onCalendarDayClicked(eventDay)
