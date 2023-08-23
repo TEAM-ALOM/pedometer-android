@@ -24,7 +24,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/deepgreen"
             app:menu="@menu/top_app_bar"
-            app:title="Pedometer" />
+            app:title="@string/app_name" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

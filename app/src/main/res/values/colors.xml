@@ -13,8 +13,9 @@
     <color name="yellow">#FFEB3B</color>
     <color name="red">#F44336</color>
 
-    <color name="lightpink">#FF9797</color>
+    <color name="pink">#DA6B85</color>
     <color name="deepgreen">#236475</color>
+    <color name="lightgreen">#E3EFF3</color>
     <color name="softblack">#353535</color>
     <color name="softwhite">#FCFCFC</color>
     <color name="babypink">#FFD3D3</color>
