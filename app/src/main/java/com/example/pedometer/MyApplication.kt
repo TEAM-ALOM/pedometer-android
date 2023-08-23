@@ -55,8 +55,8 @@ class MyApplication : Application() {
     private fun calculateInitialDelay(): Long {
         val currentTime = Calendar.getInstance()
         val targetTime = Calendar.getInstance()
-        targetTime.set(Calendar.HOUR_OF_DAY, 23)
-        targetTime.set(Calendar.MINUTE, 59)
+        targetTime.set(Calendar.HOUR_OF_DAY, 14)
+        targetTime.set(Calendar.MINUTE, 30)
         targetTime.set(Calendar.SECOND, 0)
         targetTime.set(Calendar.MILLISECOND, 0)
 

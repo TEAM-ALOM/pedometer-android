@@ -105,7 +105,7 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Coroutine
         )
     }
 
-    fun calculateInitialDelay(): Long {
+    private fun calculateInitialDelay(): Long {
         val currentTime = Calendar.getInstance()
         val targetTime = Calendar.getInstance()
         targetTime.set(Calendar.HOUR_OF_DAY, 23)

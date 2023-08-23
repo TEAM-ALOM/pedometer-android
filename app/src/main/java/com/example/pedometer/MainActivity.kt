@@ -98,10 +98,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             val clickedDate = eventDay.calendar
             val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
             val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
+            val selectedDate = clickedDate.timeInMillis // 날짜를 Long 타입으로 변환
 
             withContext(Dispatchers.IO) {
                 val selectedDaySteps = getStepsForDate(clickedDate)
-                val stepsGoal = sharedPreferences.getInt("stepsGoal", 0)
+                val stepsGoal: Int
+                if (clickedDate.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR) &&
+                    clickedDate.get(Calendar.MONTH) == Calendar.getInstance().get(Calendar.MONTH) &&
+                    clickedDate.get(Calendar.DAY_OF_MONTH) == Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                ) {
+                    stepsGoal = sharedPreferences.getInt("stepsGoal", 0)
+                } else {
+                    val stepsEntity = StepsDatabase.getInstance(this@MainActivity).stepsDAO().getByDate(selectedDate)
+                    stepsGoal = stepsEntity?.goalSteps ?: 0
+                }
 
                 withContext(Dispatchers.Main) {
                     showDayFragment(selectedDaySteps, stepsGoal, selectedMonth, selectedDay)
@@ -110,6 +120,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
         }
     }
+
 
 
     @Deprecated("Deprecated in Java")
