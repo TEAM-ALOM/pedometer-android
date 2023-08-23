@@ -3,6 +3,7 @@ package com.example.pedometer
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
@@ -32,12 +33,16 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Coroutine
                 todaySteps = getStepsToday(applicationContext).value,
                 goalSteps = getStepsGoal(applicationContext).value
             )
+            Log.e("MyWorker","데이터 저장 시작")
 
             // 백그라운드 스레드에서 데이터베이스에 접근하여 저장
             val stepsDAO = StepsDatabase.getInstance(applicationContext).stepsDAO()
             CoroutineScope(Dispatchers.IO).launch {
                 stepsDAO.insert(stepsEntity)
             }
+
+            Log.e("MyWorker","데이터 저장 완료")
+
 
             Result.success() // 작업 성공을 return
         } catch (e: Exception) {
