@@ -1,13 +1,11 @@
 package com.example.pedometer
-//
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.health.connect.client.HealthConnectClient
 import androidx.lifecycle.*
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
@@ -15,7 +13,6 @@ import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.example.pedometer.Model.StepViewModel
 import com.example.pedometer.Model.StepViewModelFactory
 import com.example.pedometer.Model.StepsDatabase
-import com.example.pedometer.Model.StepsEntity
 import com.example.pedometer.databinding.ActivityMainBinding
 import com.example.pedometer.fragment.Day
 import com.example.pedometer.fragment.SettingFragment
@@ -36,8 +33,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private lateinit var stepViewModelFactory: StepViewModelFactory
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
-    private lateinit var healthConnectClient: HealthConnectClient
-    private lateinit var healthPermissionTool: HealthPermissionTool
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,20 +40,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         val view = binding.root
         setContentView(view)
         setSupportActionBar(binding.toolbar.topAppBar3)
-        healthPermissionTool = HealthPermissionTool(this)
-        lifecycleScope.launch {
-            if (!healthPermissionTool.checkSdkStatusAndPromptForInstallation()) {
-                // Health SDK가 사용 불가능하거나 설치가 필요한 경우 처리
-                return@launch
-            }
-
-            healthConnectClient = HealthConnectClient.getOrCreate(this@MainActivity) // SDK 초기화
-
-            initializeViewModels()
-            initializeUI()
-
-        }
-
         Utils.init(this)
     }
 
@@ -86,9 +67,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             hideDayFragment()
         }
         lifecycleScope.launch {
-            if (!healthPermissionTool.checkSdkStatusAndPromptForInstallation()) {
-                return@launch
-            }
             initializeViewModels()
             initializeUI()
         }
@@ -102,16 +80,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             val selectedDate = clickedDate.timeInMillis // 날짜를 Long 타입으로 변환
 
             withContext(Dispatchers.IO) {
-                val selectedDaySteps = getStepsForDate(clickedDate)
+                val selectedDaySteps:Int
                 val stepsGoal: Int
                 if (clickedDate.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR) &&
                     clickedDate.get(Calendar.MONTH) == Calendar.getInstance().get(Calendar.MONTH) &&
                     clickedDate.get(Calendar.DAY_OF_MONTH) == Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
                 ) {
                     stepsGoal = sharedPreferences.getInt("stepsGoal", 0)
+                    selectedDaySteps=sharedPreferences.getInt("stepsToday",0)
                 } else {
                     val stepsEntity = StepsDatabase.getInstance(this@MainActivity).stepsDAO().getByDate(selectedDate)
                     stepsGoal = stepsEntity?.goalSteps ?: 0
+                    selectedDaySteps=stepsEntity?.todaySteps?:0
                 }
 
                 withContext(Dispatchers.Main) {
@@ -122,17 +102,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
     }
 
-
-
     @Deprecated("Deprecated in Java")
-    override fun onBackPressed() = //이전 버튼이 눌렸을 때
+    override fun onBackPressed() =
         if (dayFragment != null && dayFragment!!.isVisible) {
             hideDayFragment()
             isDateClicked = false
         } else {
             super.onBackPressed()
         }
-    private fun showDayFragment(stepsCount: LiveData<StepsEntity>, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
+
+    private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
         dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
         supportFragmentManager.beginTransaction()
             .add(android.R.id.content, dayFragment!!)
@@ -140,7 +119,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             .commit()
         isDateClicked = true
     }
-
 
     private fun hideDayFragment() {
         if (dayFragment != null) {
@@ -150,23 +128,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
         isDateClicked = false
     }
-
-
-    private suspend fun getStepsForDate(date: Calendar): LiveData<StepsEntity> = withContext(Dispatchers.IO) {
-        val stepsDAO = StepsDatabase.getInstance(this@MainActivity).stepsDAO() // StepsDAO 초기화
-
-        val selectedDaySteps = stepsDAO.getByDate(date.timeInMillis) // Calendar를 Long으로 변환하여 전달
-
-        MutableLiveData(selectedDaySteps)
-    }
-
-
-
-
-
-
-
-
 
     @SuppressLint("CommitPrefEdits")
     private fun initializeViewModels() {
@@ -192,12 +153,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
         startService(intent)
 
-
     }
 
-
     private fun initializeUI() {
-
         // UI 초기화 작업 수행
         val moveToSettingIcon = binding.toolbar.topAppBar3.menu.findItem(R.id.moveToSettingIcon)
         moveToSettingIcon?.setOnMenuItemClickListener {
@@ -206,22 +164,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 .addToBackStack(null)
                 .commit()
             true
-
         }
 
-
-        val calendarView: CalendarView = binding.calendarView//달력
+        val calendarView: CalendarView = binding.calendarView // 달력
         lifecycleScope.launch {
             stepViewModel.updateCalendarIcons(calendarView)
-            Log.e("MainActivity","Color status for steps")
         }
         calendarView.setOnDayClickListener(object : OnDayClickListener {
             override fun onDayClick(eventDay: EventDay) {
                 onCalendarDayClicked(eventDay)
             }
         })
-
-
     }
 
     private fun updateStepsData() {
@@ -229,5 +182,4 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         stepViewModel.updateStepsNow()
         stepViewModel.updateStepsAverage()
     }
-
 }
