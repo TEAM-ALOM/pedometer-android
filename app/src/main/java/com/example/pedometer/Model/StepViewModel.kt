@@ -12,7 +12,6 @@ import java.util.*
 
 
 class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {//걸음수 뷰모델
-
     private val _stepsToday: MutableLiveData<Int> by lazy { MutableLiveData() }
     private val _stepsAvg: MutableLiveData<Int> by lazy { MutableLiveData() }
     private val _stepsGoal: MutableLiveData<Int> by lazy { MutableLiveData() }

@@ -4,16 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
 import com.example.pedometer.BaseFragment
-import com.example.pedometer.Model.StepsEntity
 import com.example.pedometer.R
 import com.example.pedometer.databinding.FragmentDayBinding
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
-class Day(private val stepsCount: LiveData<StepsEntity>, private val stepsGoal: Int, private val selectedMonth: Int, private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
+class Day(private val stepsCount: Int, private val stepsGoal: Int, private val selectedMonth: Int, private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
 
     override fun getFragmentBinding(
         inflater: LayoutInflater,
@@ -28,16 +26,14 @@ class Day(private val stepsCount: LiveData<StepsEntity>, private val stepsGoal: 
     }
 
     private fun updatePieChart() {
-        val stepsEntity = stepsCount.value
-        val stepsCountValue = stepsEntity?.todaySteps ?: 0 // stepsEntity에서 실제 걸음 수 값을 가져옴
 
-        val stepsRemain = stepsGoal - stepsCountValue // 남은 걸음수 설정
-        binding.viewSteps.text = getString(R.string.steps_percentage, stepsCountValue.toString(), stepsGoal.toString())
+        val stepsRemain = stepsGoal - stepsCount // 남은 걸음수 설정
+        binding.viewSteps.text = getString(R.string.steps_percentage, stepsCount.toString(), stepsGoal.toString())
         binding.viewDate.text = getString(R.string.current_date, selectedMonth.toString(), selectedDay.toString())
 
 
         val entries = ArrayList<PieEntry>() // 파이차트 데이터 리스트
-        entries.add(PieEntry(stepsCountValue.toFloat(), "이만큼 걸었어요"))
+        entries.add(PieEntry(stepsCount.toFloat(), "이만큼 걸었어요"))
         entries.add(PieEntry(stepsRemain.toFloat(), "이만큼 남았어요"))
 
         val dataSet = PieDataSet(entries, "Sample Data") // 파이차트 설정

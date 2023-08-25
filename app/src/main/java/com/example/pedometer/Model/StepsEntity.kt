@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "steps")
 data class StepsEntity(
     @PrimaryKey(autoGenerate = false)
-    var date: String="",
+    var date: Long = 0L, // 날짜를 Long 타입으로 저장
     @ColumnInfo(name="todaySteps")
     var todaySteps: Int?,
     @ColumnInfo(name="goalSteps")
