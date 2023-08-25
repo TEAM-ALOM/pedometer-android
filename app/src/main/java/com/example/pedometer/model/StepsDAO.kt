@@ -1,4 +1,4 @@
-package com.example.pedometer.Model
+package com.example.pedometer.model
 
 import androidx.room.*
 import androidx.room.OnConflictStrategy.Companion.REPLACE
@@ -18,8 +18,8 @@ interface StepsDAO {
     @Delete
     fun delete(steps: StepsEntity)
     @Query("SELECT * FROM steps WHERE date = :date")
-    fun getByDate(date: Long): StepsEntity?
+    fun getByDate(date: String): StepsEntity?
     @Query("SELECT * FROM steps WHERE date BETWEEN :startTime AND :endTime")
-    fun getStepsBetweenDates(startTime: Long, endTime: Long): List<StepsEntity>
+    fun getStepsBetweenDates(startTime: String, endTime: String): List<StepsEntity>
 
 }

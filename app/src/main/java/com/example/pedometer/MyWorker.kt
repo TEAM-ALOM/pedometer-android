@@ -8,13 +8,13 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Coroutine
 
     // 주기적인 백그라운드 작업을 정의하고 수행하기 위한 공간
     override suspend fun doWork(): Result {
-        try {
+        return try {
             val stepSensorHelper = StepSensorHelper(applicationContext)
             stepSensorHelper.startListening() // StepSensorHelper 호출/ 걸음수 측 정 및 데이터 베이스에 저장
 
-            return Result.success()
+            Result.success()
         } catch (e: Exception) {
-            return Result.failure()
+            Result.failure()
         }
     }
 }

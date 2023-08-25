@@ -10,18 +10,19 @@ import androidx.lifecycle.*
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener
-import com.example.pedometer.Model.StepViewModel
-import com.example.pedometer.Model.StepViewModelFactory
-import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.databinding.ActivityMainBinding
 import com.example.pedometer.fragment.Day
 import com.example.pedometer.fragment.SettingFragment
+import com.example.pedometer.model.StepViewModel
+import com.example.pedometer.model.StepViewModelFactory
+import com.example.pedometer.model.StepsDatabase
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
 import com.github.mikephil.charting.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -77,22 +78,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             val clickedDate = eventDay.calendar
             val selectedMonth = clickedDate.get(Calendar.MONTH) + 1
             val selectedDay = clickedDate.get(Calendar.DAY_OF_MONTH)
-            val selectedDate = clickedDate.timeInMillis // 날짜를 Long 타입으로 변환
+            val selectedDate = clickedDate.timeInMillis
 
             withContext(Dispatchers.IO) {
-                val selectedDaySteps:Int
-                val stepsGoal: Int
-                if (clickedDate.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR) &&
-                    clickedDate.get(Calendar.MONTH) == Calendar.getInstance().get(Calendar.MONTH) &&
-                    clickedDate.get(Calendar.DAY_OF_MONTH) == Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                ) {
-                    stepsGoal = sharedPreferences.getInt("stepsGoal", 0)
-                    selectedDaySteps=sharedPreferences.getInt("stepsToday",0)
-                } else {
-                    val stepsEntity = StepsDatabase.getInstance(this@MainActivity).stepsDAO().getByDate(selectedDate)
-                    stepsGoal = stepsEntity?.goalSteps ?: 0
-                    selectedDaySteps=stepsEntity?.todaySteps?:0
-                }
+                val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val currentDate = dateFormatter.format(Date(selectedDate))
+
+                val stepsEntity = StepsDatabase.getInstance(this@MainActivity).stepsDAO().getByDate(currentDate)
+                val stepsGoal = stepsEntity?.goalSteps ?: 0
+                val selectedDaySteps = stepsEntity?.todaySteps ?: 0
 
                 withContext(Dispatchers.Main) {
                     showDayFragment(selectedDaySteps, stepsGoal, selectedMonth, selectedDay)
@@ -101,6 +95,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
         }
     }
+
+
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() =
@@ -133,24 +129,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         val stepsDAO = StepsDatabase.getInstance(this).stepsDAO()
-        stepRepository = StepRepositoryImpl(this@MainActivity, stepsDAO) // stepsDAO 추가
+        val calendarView: CalendarView = binding.calendarView // 달력
+        stepRepository = StepRepositoryImpl(stepsDAO) // stepsDAO 추가
         stepViewModelFactory = StepViewModelFactory(stepRepository)
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
-        val intent = Intent(this@MainActivity, MyForegroundService::class.java)
+
         stepViewModel.stepsToday.observe(this) { stepsToday ->
+            stepViewModel.updateStepsNow()
             binding.viewStepsToday.text = getString(R.string.steps_now,stepsToday)
-            with(sharedPreferences.edit()) {
-                putInt("stepsToday", stepsToday)
-                apply()
-            }
         }
         stepViewModel.stepsAvg.observe(this) { stepsAvg ->
+            stepViewModel.updateStepsAverage()
             binding.viewStepsAvg.text = getString(R.string.steps_Avg,stepsAvg)
         }
-        intent.putExtra("stepsToday", sharedPreferences.getInt("stepsToday",0))
-        intent.putExtra("stepsGoal", sharedPreferences.getInt("stepsGoal",0))
+        val intent = Intent(this@MainActivity, MyForegroundService::class.java)
         startService(intent)
 
     }
