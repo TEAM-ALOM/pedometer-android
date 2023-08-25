@@ -1,4 +1,4 @@
-package com.example.pedometer.Model
+package com.example.pedometer.model
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.pedometer.repository.StepRepository

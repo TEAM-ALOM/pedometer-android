@@ -3,7 +3,6 @@ package com.example.pedometer
 import android.app.Application
 import android.content.Context
 import android.icu.util.Calendar
-import android.util.Log
 import androidx.work.*
 import java.util.concurrent.TimeUnit
 
@@ -11,11 +10,8 @@ import java.util.concurrent.TimeUnit
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        Log.e("MyApplication","Myapllication 활성화")
-        val stepSensorHelper = StepSensorHelper(this) // context를 전달하여 초기화
+        val stepSensorHelper = StepSensorHelper(this)
         stepSensorHelper.startListening()
-        Log.e("MyApplication","stepsensor 활성화")
-
         // 추가: 백그라운드 작업 스케줄링 호출
         scheduleDailyWork(this)
     }
@@ -37,7 +33,6 @@ class MyApplication : Application() {
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
-        Log.e("MyApplication", "MyWorker 호출")
     }
 
 

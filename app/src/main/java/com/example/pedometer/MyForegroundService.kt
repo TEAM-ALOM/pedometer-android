@@ -7,22 +7,22 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.example.pedometer.Model.StepsDAO
-import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.R.string.notification_channel_description
 import com.example.pedometer.R.string.notification_channel_name
+import com.example.pedometer.model.StepsDAO
+import com.example.pedometer.model.StepsDatabase
 import com.example.pedometer.repository.StepRepository
 import com.example.pedometer.repository.StepRepositoryImpl
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MyForegroundService : LifecycleService() {
 
@@ -30,8 +30,6 @@ class MyForegroundService : LifecycleService() {
     private val notificationID = 1
     private lateinit var stepRepository: StepRepository
     private lateinit var stepsDAO: StepsDAO
-    private val viewModelScope = CoroutineScope(Dispatchers.Main)
-    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
@@ -42,13 +40,15 @@ class MyForegroundService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         createNotificationChannel()
-        sharedPreferences = getSharedPreferences("stepsData", MODE_PRIVATE)
 
-        stepRepository = StepRepositoryImpl(this, stepsDAO)
-        lifecycleScope.launch {
-            val stepsToday = sharedPreferences.getInt("stepsToday",0)
-            val stepsGoal = sharedPreferences.getInt("stepsGoal",0)
-            val stepsPercent = if (stepsGoal > 0) ((stepsToday.toDouble() ?: 0.0) / stepsGoal.toDouble() * 100).toInt() else 0
+        stepRepository = StepRepositoryImpl(stepsDAO)
+        lifecycleScope.launch(Dispatchers.IO) { // 백그라운드 스레드로 변경
+            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val stepsEntity = stepsDAO.getByDate(currentDate)
+
+            val stepsToday = stepsEntity?.todaySteps ?: 0
+            val stepsGoal = stepsEntity?.goalSteps ?: 0
+            val stepsPercent = if (stepsGoal > 0) (stepsToday.toDouble() / stepsGoal.toDouble() * 100).toInt() else 0
 
             val notificationContent = getString(
                 R.string.notification_content_text,
@@ -58,7 +58,7 @@ class MyForegroundService : LifecycleService() {
             )
 
             val notificationIntent = Intent(this@MyForegroundService, MainActivity::class.java)
-            val pendingIntent = PendingIntent.getActivity(this@MyForegroundService, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+            val pendingIntent = PendingIntent.getActivity(this@MyForegroundService, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
             val notification = buildNotification(notificationContent, pendingIntent)
 
@@ -66,6 +66,7 @@ class MyForegroundService : LifecycleService() {
         }
         return START_NOT_STICKY
     }
+
 
 
     private fun createNotificationChannel() {

@@ -8,21 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.lifecycle.ViewModelProvider
 import com.example.pedometer.BaseFragment
-import com.example.pedometer.Model.StepViewModel
-import com.example.pedometer.Model.StepViewModelFactory
-import com.example.pedometer.Model.StepsDAO
-import com.example.pedometer.Model.StepsDatabase
 import com.example.pedometer.MyForegroundService
 import com.example.pedometer.databinding.FragmentSettingBinding
-import com.example.pedometer.repository.StepRepository
-import com.example.pedometer.repository.StepRepositoryImpl
+import com.example.pedometer.model.StepsDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
-    private lateinit var stepViewModelFactory: StepViewModelFactory
-    private lateinit var stepViewModel: StepViewModel
-    private lateinit var stepRepository: StepRepository
 
     private fun showPopup(stepsGoal: Int) {
         val builder = AlertDialog.Builder(requireContext())
@@ -70,23 +67,35 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
     }
     private fun updateGoal(updatestepsGoal: Int, sharedPrefs: SharedPreferences) {
         val stepsDAO = StepsDatabase.getInstance(requireContext()).stepsDAO()
-        val nonNullableStepsDAO: StepsDAO = stepsDAO
-        stepRepository = StepRepositoryImpl(requireContext(), stepsDAO)
-        stepViewModelFactory = StepViewModelFactory(stepRepository)
-        stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
-        stepViewModel.updateStepsGoal(updatestepsGoal)
-        stepViewModel.stepsGoal.observe(viewLifecycleOwner) { stepsGoal ->
+
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        CoroutineScope(Dispatchers.IO).launch {
+            // 데이터베이스에서 현재 날짜에 해당하는 StepsEntity 가져오기
+            val stepsEntity = stepsDAO.getByDate(currentDate)
+
+            stepsEntity?.let {
+                it.goalSteps = updatestepsGoal // 목표 걸음 수 업데이트
+                stepsDAO.update(it) // 데이터베이스 업데이트
+            }
+
+            // SharedPreferences에 목표 걸음 수 업데이트
             with(sharedPrefs.edit()) {
-                putInt("stepsGoal", stepsGoal)
+                putInt("stepsGoal", updatestepsGoal)
                 apply()
             }
-            val updatedGoal = sharedPrefs.getInt("stepsGoal", 0)
-            showPopup(updatedGoal)
-            val intent = Intent(requireContext(), MyForegroundService::class.java)
-            intent.putExtra("stepsGoal", updatedGoal)
-        }
 
-        requireActivity().supportFragmentManager.popBackStack()
+            val updatedGoal = sharedPrefs.getInt("stepsGoal", 0)
+            withContext(Dispatchers.Main) {
+                showPopup(updatedGoal)
+
+                val intent = Intent(requireContext(), MyForegroundService::class.java)
+                requireContext().startService(intent)
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+        }
     }
+
+
 
 }

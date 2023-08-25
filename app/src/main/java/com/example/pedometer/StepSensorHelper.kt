@@ -6,12 +6,14 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.pedometer.Model.StepsDatabase
-import com.example.pedometer.Model.StepsEntity
+import com.example.pedometer.model.StepsDatabase
+import com.example.pedometer.model.StepsEntity
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class StepSensorHelper(private val context: Context) : SensorEventListener {
 
@@ -19,7 +21,7 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
-    val stepsToday: LiveData<Int>
+    private val stepsToday: LiveData<Int>
         get() = _stepsToday
 
     init {
@@ -31,10 +33,6 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
         saveStepsToDatabase(stepsToday.value ?: 0) // 측정된 걸음수를 데이터베이스에 저장
-    }
-
-    fun stopListening() {
-        sensorManager.unregisterListener(this)
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -59,17 +57,18 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
         val stepsDAO = StepsDatabase.getInstance(context).stepsDAO()
 
         GlobalScope.launch(Dispatchers.IO) {
-            val existingEntity = stepsDAO.getByDate(currentTimeMillis)
+            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTimeMillis))
+            val existingEntity = stepsDAO.getByDate(currentDate)
 
             if (existingEntity != null) {
                 // 이미 해당 날짜의 Entity가 존재하면 업데이트
                 existingEntity.todaySteps = steps
-                existingEntity.goalSteps=sharedPrefs.getInt("stepsGoal",0)
+                existingEntity.goalSteps = sharedPrefs.getInt("stepsGoal", 0)
                 stepsDAO.update(existingEntity)
             } else {
                 // 해당 날짜의 Entity가 없으면 새로 생성
                 val stepsEntity = StepsEntity(
-                    date = currentTimeMillis,
+                    date = currentDate,
                     todaySteps = steps,
                     goalSteps = sharedPrefs.getInt("stepsGoal", 0)
                 )
@@ -77,4 +76,5 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
             }
         }
     }
+
 }
