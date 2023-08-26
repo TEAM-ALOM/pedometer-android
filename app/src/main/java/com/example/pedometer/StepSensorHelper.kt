@@ -21,30 +21,31 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
-    val stepsToday: LiveData<Int>
+    private val stepsToday: LiveData<Int>
         get() = _stepsToday
 
-    init {
-        startListening()
-    }
 
     fun startListening() {
         stepSensor?.let { sensor ->
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
+
         saveStepsToDatabase(stepsToday.value ?: 0) // 측정된 걸음수를 데이터베이스에 저장
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Do nothing
     }
-
+    fun stopListening() {
+        sensorManager.unregisterListener(this)
+    }
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor == stepSensor) {
                 val steps = it.values[0].toInt()
                 _stepsToday.postValue(steps) // LiveData 값을 업데이트
                 saveStepsToDatabase(steps)
+
             }
         }
     }
