@@ -39,11 +39,10 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
     fun updateCalendarIcons(calendar: CalendarView) {
         viewModelScope.launch {
             val events: MutableList<EventDay> = ArrayList()
-            val stepsEntities = stepRepository.getAllSteps()    // 모든 StepsEntity 가져오기
+            val stepsEntities = stepRepository.getAllSteps()
 
-            for(stepsEntity in stepsEntities){
-                val iconColor = calculateIconColor(stepsEntity.todaySteps!!, stepsEntity.goalSteps!!)
-                // 강제로 non-nullable로 변환. 만약 값이 없었던 경우 런타임에서 NullPointException이 발생할 수 있음.
+            for (stepsEntity in stepsEntities) {
+                val iconColor = calculateIconColor(stepsEntity.todaySteps ?: 0, stepsEntity.goalSteps ?: 0)
                 val date = Calendar.getInstance().apply {
                     timeInMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(stepsEntity.date)?.time ?: 0
                 }
@@ -52,6 +51,8 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
             }
             calendar.setEvents(events)
         }
+
+
     }
 
     private fun calculateIconColor(stepsToday: Int, stepsGoal: Int): Int {

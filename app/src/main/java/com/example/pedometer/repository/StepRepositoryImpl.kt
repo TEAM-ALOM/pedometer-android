@@ -83,7 +83,9 @@ class StepRepositoryImpl(
         }
 
         override suspend fun getAllSteps(): List<StepsEntity> {
-                return stepsDAO.getAll()
+                return withContext(Dispatchers.IO) {
+                        stepsDAO.getAll()
+                }
         }
 
 

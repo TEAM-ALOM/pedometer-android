@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/deepgreen"
             app:menu="@menu/top_app_bar"
-            app:title="Pedometer(임시)" />
+            app:title="Pedometer" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,5 +33,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/top_app_bar"
-        app:title="Pedometer(임시)" />
+        app:title="Pedometer" />
 </androidx.constraintlayout.widget.ConstraintLayout>

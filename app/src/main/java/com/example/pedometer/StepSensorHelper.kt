@@ -21,7 +21,7 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
-    private val stepsToday: LiveData<Int>
+    val stepsToday: LiveData<Int>
         get() = _stepsToday
 
     init {
@@ -66,6 +66,7 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
                 existingEntity.goalSteps = sharedPrefs.getInt("stepsGoal", 0)
                 stepsDAO.update(existingEntity)
             } else {
+
                 // 해당 날짜의 Entity가 없으면 새로 생성
                 val stepsEntity = StepsEntity(
                     date = currentDate,
