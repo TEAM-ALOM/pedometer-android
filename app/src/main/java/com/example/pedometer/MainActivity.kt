@@ -34,6 +34,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private lateinit var stepViewModelFactory: StepViewModelFactory
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
+    private lateinit var calendarView: CalendarView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +43,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         setContentView(view)
         setSupportActionBar(binding.toolbar.topAppBar3)
         Utils.init(this)
+
+        calendarView = binding.calendarView // 달력 초기화
+        initializeViewModels()
+        initializeUI()
+
+        stepViewModel.updateCalendarIcons(calendarView)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -129,10 +136,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private fun initializeViewModels() {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         val stepsDAO = StepsDatabase.getInstance(this).stepsDAO()
-        val calendarView: CalendarView = binding.calendarView // 달력
+
         stepRepository = StepRepositoryImpl(stepsDAO) // stepsDAO 추가
         stepViewModelFactory = StepViewModelFactory(stepRepository)
+
         stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
+
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
 
@@ -176,4 +185,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         stepViewModel.updateStepsNow()
         stepViewModel.updateStepsAverage()
     }
+
+
 }
