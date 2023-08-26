@@ -9,6 +9,7 @@ import com.applandeo.materialcalendarview.EventDay
 import com.example.pedometer.R
 import com.example.pedometer.repository.StepRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.*
 
 class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
@@ -38,20 +39,25 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
     fun updateCalendarIcons(calendar: CalendarView) {
         viewModelScope.launch {
             val events: MutableList<EventDay> = ArrayList()
-            val date = Calendar.getInstance()
+            val stepsEntities = stepRepository.getAllSteps()    // 모든 StepsEntity 가져오기
 
-            val stepsToday = _stepsToday.value ?: 0
-            val stepsGoal = stepRepository.getStepsGoal().value?:0
-
-            val iconColor = calculateIconColor(stepsToday, stepsGoal)
-            val eventDay = EventDay(date, iconColor)
-            events.add(eventDay)
-
+            for(stepsEntity in stepsEntities){
+                val iconColor = calculateIconColor(stepsEntity.todaySteps!!, stepsEntity.goalSteps!!)
+                // 강제로 non-nullable로 변환. 만약 값이 없었던 경우 런타임에서 NullPointException이 발생할 수 있음.
+                val date = Calendar.getInstance().apply {
+                    timeInMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(stepsEntity.date)?.time ?: 0
+                }
+                val eventDay = EventDay(date, iconColor)
+                events.add(eventDay)
+            }
             calendar.setEvents(events)
         }
     }
 
     private fun calculateIconColor(stepsToday: Int, stepsGoal: Int): Int {
+        if (stepsToday == null || stepsGoal == null) {
+            // 값이 없을 경우에 대한 처리
+        }
         val ratio = if (stepsGoal > 0) stepsToday.toFloat() / stepsGoal.toFloat() else 0f
 
         return when {

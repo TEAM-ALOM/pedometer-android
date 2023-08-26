@@ -3,6 +3,7 @@ package com.example.pedometer.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.pedometer.model.StepsDAO
+import com.example.pedometer.model.StepsEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -79,6 +80,10 @@ class StepRepositoryImpl(
                                 e.printStackTrace()
                         }
                 }
+        }
+
+        override suspend fun getAllSteps(): List<StepsEntity> {
+                return stepsDAO.getAll()
         }
 
 
