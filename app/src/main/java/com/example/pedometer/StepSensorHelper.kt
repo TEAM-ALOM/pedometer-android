@@ -8,13 +8,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.pedometer.model.StepsDatabase
 import com.example.pedometer.model.StepsEntity
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Suppress("DEPRECATION")
+@OptIn(DelicateCoroutinesApi::class)
 class StepSensorHelper(private val context: Context) : SensorEventListener {
 
     private val sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -23,7 +22,13 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     private var _stepsToday = MutableLiveData<Int>()
     private val stepsToday: LiveData<Int>
         get() = _stepsToday
-
+    private var stepsPrev=0
+    init {
+        // 데이터베이스에서 전날 걸음수를 가져와 stepsPrev에 저장
+        GlobalScope.launch(Dispatchers.IO) {
+            stepsPrev = loadPreviousDaySteps()
+        }
+    }
 
     fun startListening() {
         stepSensor?.let { sensor ->
@@ -43,8 +48,9 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
         event?.let {
             if (it.sensor == stepSensor) {
                 val steps = it.values[0].toInt()
-                _stepsToday.postValue(steps) // LiveData 값을 업데이트
-                saveStepsToDatabase(steps)
+                val realsteps=steps-stepsPrev
+                _stepsToday.postValue(realsteps) // LiveData 값을 업데이트
+                saveStepsToDatabase(realsteps)
 
             }
         }
@@ -78,5 +84,19 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
             }
         }
     }
+    // 데이터베이스에서 전날 걸음수를 가져와 저장
+    private suspend fun loadPreviousDaySteps(): Int = withContext(Dispatchers.IO) {
+        val currentTimeMillis = System.currentTimeMillis()
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTimeMillis))
 
+        val stepsDAO = StepsDatabase.getInstance(context).stepsDAO()
+        val allStepsEntities = stepsDAO.getAll()
+
+        // 오늘을 제외한 전체 날짜의 걸음수 합을 계산
+        val totalSteps = allStepsEntities
+            .filter { it.date != todayDate }
+            .sumBy { it.todaySteps?:0 }
+
+        totalSteps
+    }
 }
