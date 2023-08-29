@@ -34,8 +34,8 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
     }
 
     suspend fun updateStepsAverage() {
-        val stepsAvgValue = stepRepository.getStepsAvg().value?:0
-        _stepsAvg.postValue(stepsAvgValue)
+        val stepsAverageValue = stepRepository.getStepsAvg().value?:0
+        _stepsGoal.postValue(stepsAverageValue)
     }
 
     fun updateCalendarIcons(calendar: CalendarView) {

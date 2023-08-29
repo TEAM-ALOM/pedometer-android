@@ -4,6 +4,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.pedometer.model.StepsDatabase
@@ -44,8 +45,10 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Do nothing
     }
-    fun stopListening() {
+    suspend fun stopListening() {
+        Log.e("SSH","센서 다시 시작중")
         sensorManager.unregisterListener(this)
+        delay(3000)
     }
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {

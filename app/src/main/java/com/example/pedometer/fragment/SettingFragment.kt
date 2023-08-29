@@ -11,7 +11,10 @@ import android.view.inputmethod.EditorInfo
 import com.example.pedometer.BaseFragment
 import com.example.pedometer.MyForegroundService
 import com.example.pedometer.databinding.FragmentSettingBinding
+import com.example.pedometer.model.StepViewModel
+import com.example.pedometer.model.StepViewModelFactory
 import com.example.pedometer.model.StepsDatabase
+import com.example.pedometer.repository.StepRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +23,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class SettingFragment : BaseFragment<FragmentSettingBinding>() {
+    private lateinit var stepViewModelFactory: StepViewModelFactory
+    private lateinit var stepViewModel: StepViewModel
+    private lateinit var stepRepository: StepRepository
 
     private fun showPopup(stepsGoal: Int) {
         val builder = AlertDialog.Builder(requireContext())

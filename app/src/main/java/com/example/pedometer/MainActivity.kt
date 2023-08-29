@@ -47,12 +47,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         setSupportActionBar(binding.toolbar.topAppBar3)
         Utils.init(this)
 
-        calendarView = binding.calendarView // 달력 초기화
         lifecycleScope.launch {
             initializeViewModels()
             initializeUI()
         }
-        stepViewModel.updateCalendarIcons(calendarView)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -78,6 +77,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         if (!isDateClicked) {
             hideDayFragment()
         }
+        calendarView = binding.calendarView // 달력 초기화
+        stepViewModel.updateCalendarIcons(calendarView)
 
     }
 
