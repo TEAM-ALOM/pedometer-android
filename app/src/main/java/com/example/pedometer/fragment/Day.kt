@@ -1,5 +1,4 @@
 package com.example.pedometer.fragment
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +10,7 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 
+@Suppress("DEPRECATION")
 class Day(private val stepsCount: Int, private val stepsGoal: Int, private val selectedMonth: Int, private val selectedDay: Int) : BaseFragment<FragmentDayBinding>() {
 
     override fun getFragmentBinding(
@@ -44,12 +44,12 @@ class Day(private val stepsCount: Int, private val stepsGoal: Int, private val s
 
         // 걸음수 비율에 따라 색상 설정
         dataSet.colors = when {
-            stepsRatio == 100f -> listOf(Color.BLUE, Color.BLUE) // 남은 걸음수가 0%면 파란색
-            stepsRatio >= 50f -> listOf(Color.BLUE, Color.YELLOW) // 0% 초과 ~ 50% 이하면 노란색
-            else -> listOf(Color.BLUE, Color.RED) // 50% 초과 ~ 100% 이하면 빨간색
+            stepsRatio == 100f -> listOf(resources.getColor(R.color.blue),resources.getColor(R.color.blue)) // 남은 걸음수가 0%면 파란색
+            stepsRatio >= 50f -> listOf(resources.getColor(R.color.blue), resources.getColor(R.color.yellow)) // 0% 초과 ~ 50% 이하면 노란색
+            else -> listOf(resources.getColor(R.color.blue), resources.getColor(R.color.red)) // 50% 초과 ~ 100% 이하면 빨간색
         }
 
-        dataSet.valueTextColor = Color.BLACK
+        dataSet.valueTextColor = resources.getColor(R.color.lightgreen)
         dataSet.valueTextSize = 28f
 
         val data = PieData(dataSet)
