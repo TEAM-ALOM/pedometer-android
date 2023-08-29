@@ -94,7 +94,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 val stepsEntity = StepsDatabase.getInstance(this@MainActivity).stepsDAO().getByDate(currentDate)
                 val stepsGoal = stepsEntity?.goalSteps ?: 0
                 val selectedDaySteps = stepsEntity?.todaySteps ?: 0
-
                 withContext(Dispatchers.Main) {
                     showDayFragment(selectedDaySteps, stepsGoal, selectedMonth, selectedDay)
                     isDateClicked = true

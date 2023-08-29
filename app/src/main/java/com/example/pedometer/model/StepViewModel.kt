@@ -21,11 +21,19 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
         get() = _stepsToday
     val stepsAvg: LiveData<Int>
         get() = _stepsAvg
+    val stepsGoal: LiveData<Int>
+        get() = _stepsGoal
 
     fun updateStepsNow() {
         viewModelScope.launch {
             val stepsTodayValue = stepRepository.getStepsToday().value?:0
             _stepsToday.postValue(stepsTodayValue)
+        }
+    }
+    fun updateStepsGoal() {
+        viewModelScope.launch {
+            val stepsGoalValue = stepRepository.getStepsGoal().value?:0
+            _stepsGoal.postValue(stepsGoalValue)
         }
     }
 
