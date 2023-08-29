@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        val stepSensorHelper = StepSensorHelper(this)
-        // 추가: 백그라운드 작업 스케줄링 호출
         scheduleDailyWork(this)
     }
     private fun scheduleDailyWork(context: Context) {

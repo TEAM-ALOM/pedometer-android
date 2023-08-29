@@ -14,7 +14,7 @@ import java.util.*
 
 @Suppress("DEPRECATION")
 @OptIn(DelicateCoroutinesApi::class)
-class StepSensorHelper(private val context: Context) : SensorEventListener {
+class StepSensorHelper(private val context: Context,private val scope: CoroutineScope) : SensorEventListener {
 
     private val sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -25,7 +25,7 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     private var stepsPrev=0
     init {
         // 데이터베이스에서 전날 걸음수를 가져와 stepsPrev에 저장
-        GlobalScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             stepsPrev = loadPreviousDaySteps()
         }
     }
@@ -35,7 +35,10 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
 
-        saveStepsToDatabase(stepsToday.value ?: 0) // 측정된 걸음수를 데이터베이스에 저장
+        scope.launch(Dispatchers.IO) {
+            val stepsTodayValue = _stepsToday.value ?: 0
+            saveStepsToDatabase(stepsTodayValue)
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

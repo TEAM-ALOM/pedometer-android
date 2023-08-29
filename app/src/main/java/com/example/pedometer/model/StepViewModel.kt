@@ -24,24 +24,18 @@ class StepViewModel(private val stepRepository: StepRepository) : ViewModel() {
     val stepsGoal: LiveData<Int>
         get() = _stepsGoal
 
-    fun updateStepsNow() {
-        viewModelScope.launch {
-            val stepsTodayValue = stepRepository.getStepsToday().value?:0
-            _stepsToday.postValue(stepsTodayValue)
-        }
+    suspend fun updateStepsNow() {
+        val stepsTodayValue = stepRepository.getStepsToday().value ?: 0
+        _stepsToday.postValue(stepsTodayValue)
     }
-    fun updateStepsGoal() {
-        viewModelScope.launch {
-            val stepsGoalValue = stepRepository.getStepsGoal().value?:0
-            _stepsGoal.postValue(stepsGoalValue)
-        }
+    suspend fun updateStepsGoal() {
+        val stepsGoalValue = stepRepository.getStepsGoal().value?:0
+        _stepsGoal.postValue(stepsGoalValue)
     }
 
-    fun updateStepsAverage() {
-        viewModelScope.launch {
-            val stepsAvgValue = stepRepository.getStepsAvg().value?:0
-            _stepsAvg.postValue(stepsAvgValue)
-        }
+    suspend fun updateStepsAverage() {
+        val stepsAvgValue = stepRepository.getStepsAvg().value?:0
+        _stepsAvg.postValue(stepsAvgValue)
     }
 
     fun updateCalendarIcons(calendar: CalendarView) {

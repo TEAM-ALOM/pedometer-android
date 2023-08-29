@@ -1,14 +1,14 @@
 package com.example.pedometer
-
 import android.content.Context
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.coroutineScope
 
-class MyWorker(context: Context, workerParameters: WorkerParameters) : Worker(context, workerParameters) {
+class MyWorker(context: Context, workerParameters: WorkerParameters) : CoroutineWorker(context, workerParameters) {
 
-    override fun doWork(): Result {
-        return try {
-            val stepSensorHelper = StepSensorHelper(applicationContext)
+    override suspend fun doWork(): Result = coroutineScope {
+        try {
+            val stepSensorHelper = StepSensorHelper(applicationContext, this)
             stepSensorHelper.stopListening()
             stepSensorHelper.startListening()
             Result.success()
@@ -17,3 +17,4 @@ class MyWorker(context: Context, workerParameters: WorkerParameters) : Worker(co
         }
     }
 }
+

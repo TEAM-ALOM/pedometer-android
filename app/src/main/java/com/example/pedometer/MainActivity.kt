@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.lifecycle.*
 import com.applandeo.materialcalendarview.CalendarView
 import com.applandeo.materialcalendarview.EventDay
@@ -35,6 +36,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     private lateinit var stepViewModel: StepViewModel
     private lateinit var stepRepository: StepRepository
     private lateinit var calendarView: CalendarView
+    private var backPressedTime: Long = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +48,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         Utils.init(this)
 
         calendarView = binding.calendarView // 달력 초기화
-        initializeViewModels()
-        initializeUI()
-
+        lifecycleScope.launch {
+            initializeViewModels()
+            initializeUI()
+        }
         stepViewModel.updateCalendarIcons(calendarView)
     }
 
@@ -74,10 +78,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         if (!isDateClicked) {
             hideDayFragment()
         }
-        lifecycleScope.launch {
-            initializeViewModels()
-            initializeUI()
-        }
+
     }
 
     private fun onCalendarDayClicked(eventDay: EventDay) {
@@ -102,59 +103,66 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         }
     }
 
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() =
-        if (dayFragment != null && dayFragment!!.isVisible) {
-            hideDayFragment()
-            isDateClicked = false
-        } else {
-            super.onBackPressed()
-        }
-
     private fun showDayFragment(stepsCount: Int, stepsGoal: Int, selectedMonth: Int, selectedDay: Int) {
         dayFragment = Day(stepsCount, stepsGoal, selectedMonth, selectedDay)
         supportFragmentManager.beginTransaction()
             .add(android.R.id.content, dayFragment!!)
-            .addToBackStack(null)
             .commit()
         isDateClicked = true
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (dayFragment != null && dayFragment!!.isVisible) {
+            hideDayFragment()
+            isDateClicked = false
+        } else {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - backPressedTime < 2000) {
+                super.onBackPressed()
+            } else {
+                backPressedTime = currentTime
+                Toast.makeText(this, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun hideDayFragment() {
-        if (dayFragment != null) {
+        if (dayFragment != null && dayFragment!!.isVisible) {
             supportFragmentManager.beginTransaction()
                 .hide(dayFragment!!)
                 .commit()
         }
-        isDateClicked = false
     }
 
     @SuppressLint("CommitPrefEdits")
-    private fun initializeViewModels() {
+    private fun initializeViewModels() = lifecycleScope.launch {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
-        val stepsDAO = StepsDatabase.getInstance(this).stepsDAO()
+        val stepsDAO = StepsDatabase.getInstance(this@MainActivity).stepsDAO()
 
         stepRepository = StepRepositoryImpl(stepsDAO) // stepsDAO 추가
         stepViewModelFactory = StepViewModelFactory(stepRepository)
 
-        stepViewModel = ViewModelProvider(this, stepViewModelFactory)[StepViewModel::class.java]
+        stepViewModel = ViewModelProvider(this@MainActivity, stepViewModelFactory)[StepViewModel::class.java]
 
         // LiveData 옵저빙 및 데이터 업데이트 작업 수행
         updateStepsData()
 
-        stepViewModel.stepsToday.observe(this) { stepsToday ->
-            stepViewModel.updateStepsNow()
-            binding.viewStepsToday.text = getString(R.string.steps_now,stepsToday)
+        stepViewModel.stepsToday.observe(this@MainActivity) { stepsToday ->
+            lifecycleScope.launch {
+                stepViewModel.updateStepsNow()
+            }
+            binding.viewStepsToday.text = getString(R.string.steps_now, stepsToday)
         }
-        stepViewModel.stepsAvg.observe(this) { stepsAvg ->
-            stepViewModel.updateStepsAverage()
-            binding.viewStepsAvg.text = getString(R.string.steps_Avg,stepsAvg)
+        stepViewModel.stepsAvg.observe(this@MainActivity) { stepsAvg ->
+            lifecycleScope.launch {
+                stepViewModel.updateStepsAverage()
+
+            }
+            binding.viewStepsAvg.text = getString(R.string.steps_Avg, stepsAvg)
         }
         val intent = Intent(this@MainActivity, MyForegroundService::class.java)
         startService(intent)
-
     }
 
     private fun initializeUI() {
@@ -179,7 +187,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         })
     }
 
-    private fun updateStepsData() {
+    private suspend fun updateStepsData() {
         // 걸음 수 데이터 업데이트 작업 수행
         stepViewModel.updateStepsNow()
         stepViewModel.updateStepsAverage()
