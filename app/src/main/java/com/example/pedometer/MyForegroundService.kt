@@ -64,7 +64,7 @@ class MyForegroundService : LifecycleService() {
 
             showNotification(notification)
         }
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
 

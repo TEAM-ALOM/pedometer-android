@@ -1,6 +1,8 @@
 package com.example.pedometer
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -29,6 +31,7 @@ import java.util.*
 
 @Suppress("DEPRECATION")
 class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inflate(it) }){
+    private var isForeground = false
     private lateinit var sharedPreferences: SharedPreferences
     private var isDateClicked = false
     private var dayFragment: Day? = null
@@ -46,9 +49,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
         setContentView(view)
         setSupportActionBar(binding.toolbar.topAppBar3)
         Utils.init(this)
-
         lifecycleScope.launch {
-            initializeViewModels()
+            observeViewModel()
             initializeUI()
         }
 
@@ -74,12 +76,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
 
     override fun onResume() {
         super.onResume()
+        isForeground = true
         if (!isDateClicked) {
             hideDayFragment()
         }
-        calendarView = binding.calendarView // 달력 초기화
-        stepViewModel.updateCalendarIcons(calendarView)
-
+        if (isForeground && !isInBackground()) { // Check if app is in the foreground
+            updateUI()
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        isForeground = false
+    }
+    private fun isInBackground(): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val appProcesses = activityManager.runningAppProcesses
+        for (appProcess in appProcesses) {
+            if (appProcess.processName == packageName) {
+                return appProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+            }
+        }
+        return false
     }
 
     private fun onCalendarDayClicked(eventDay: EventDay) {
@@ -137,7 +154,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
     }
 
     @SuppressLint("CommitPrefEdits")
-    private fun initializeViewModels() = lifecycleScope.launch {
+    private fun observeViewModel() = lifecycleScope.launch {
         // ViewModel 초기화 및 옵저빙 등 ViewModel 관련 작업 수행
         val stepsDAO = StepsDatabase.getInstance(this@MainActivity).stepsDAO()
 
@@ -162,12 +179,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
             }
             binding.viewStepsAvg.text = getString(R.string.steps_Avg, stepsAvg)
         }
-        val intent = Intent(this@MainActivity, MyForegroundService::class.java)
-        startService(intent)
     }
 
     private fun initializeUI() {
         // UI 초기화 작업 수행
+        calendarView = binding.calendarView
         val moveToSettingIcon = binding.toolbar.topAppBar3.menu.findItem(R.id.moveToSettingIcon)
         moveToSettingIcon?.setOnMenuItemClickListener {
             supportFragmentManager.beginTransaction()
@@ -176,16 +192,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ ActivityMainBinding.inf
                 .commit()
             true
         }
-
-        val calendarView: CalendarView = binding.calendarView // 달력
-        lifecycleScope.launch {
-            stepViewModel.updateCalendarIcons(calendarView)
-        }
         calendarView.setOnDayClickListener(object : OnDayClickListener {
             override fun onDayClick(eventDay: EventDay) {
                 onCalendarDayClicked(eventDay)
             }
         })
+    }
+    private fun updateUI(){
+        calendarView= binding.calendarView // 달력
+        lifecycleScope.launch {
+            stepViewModel.updateCalendarIcons(calendarView)
+        }
+        val intent = Intent(this, MyForegroundService::class.java)
+        startService(intent)
     }
 
     private suspend fun updateStepsData() {

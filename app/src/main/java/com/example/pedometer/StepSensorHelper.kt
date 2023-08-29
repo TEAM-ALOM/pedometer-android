@@ -4,8 +4,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.pedometer.model.StepsDatabase
 import com.example.pedometer.model.StepsEntity
@@ -21,8 +19,7 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
-    private val stepsToday: LiveData<Int>
-        get() = _stepsToday
+
     private var stepsPrev=0
     init {
         // 데이터베이스에서 전날 걸음수를 가져와 stepsPrev에 저장
@@ -45,11 +42,7 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Do nothing
     }
-    suspend fun stopListening() {
-        Log.e("SSH","센서 다시 시작중")
-        sensorManager.unregisterListener(this)
-        delay(3000)
-    }
+
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor == stepSensor) {
@@ -57,7 +50,6 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
                 val realsteps=steps-stepsPrev
                 _stepsToday.postValue(realsteps) // LiveData 값을 업데이트
                 saveStepsToDatabase(realsteps)
-
             }
         }
     }
