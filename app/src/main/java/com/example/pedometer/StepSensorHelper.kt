@@ -19,6 +19,8 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
+    private var hasRebooted = false // 재부팅 여부를 나타내는 플래그 추가
+
 
     private var stepsPrev=0
     init {
@@ -47,7 +49,11 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
         event?.let {
             if (it.sensor == stepSensor) {
                 val steps = it.values[0].toInt()
-                val realsteps=steps-stepsPrev
+                val realsteps = if (hasRebooted) {
+                    _stepsToday.value ?: 0
+                } else {
+                    steps - stepsPrev
+                }
                 _stepsToday.postValue(realsteps) // LiveData 값을 업데이트
                 saveStepsToDatabase(realsteps)
             }
@@ -78,6 +84,7 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
                     todaySteps = steps,
                     goalSteps = sharedPrefs.getInt("stepsGoal", 0)
                 )
+                hasRebooted=false//새로운 엔티티가 생긴 후 저장되었으므로 리부팅 메세지 철회
                 stepsDAO.insert(stepsEntity)
             }
         }
@@ -96,5 +103,8 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
             .sumBy { it.todaySteps?:0 }
 
         totalSteps
+    }
+    fun onReboot() {
+        hasRebooted = true
     }
 }
