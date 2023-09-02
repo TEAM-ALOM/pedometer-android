@@ -1,5 +1,7 @@
 package com.example.pedometer
+
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -13,31 +15,41 @@ import java.util.*
 
 @Suppress("DEPRECATION")
 @OptIn(DelicateCoroutinesApi::class)
-class StepSensorHelper(private val context: Context,private val scope: CoroutineScope) : SensorEventListener {
+class StepSensorHelper(private val context: Context, private val scope: CoroutineScope) : SensorEventListener {
 
     private val sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
     private var _stepsToday = MutableLiveData<Int>()
     private var hasRebooted = false // 재부팅 여부를 나타내는 플래그 추가
+    private var bootDate: Long = 0 // 핸드폰 부팅한 날짜를 저장할 변수 추가
+    private val sharedPreferences: SharedPreferences =
+        context.getSharedPreferences("pedometerPrefs", Context.MODE_PRIVATE)
 
-
-    private var stepsPrev=0
+    private var stepsPrev = 0
     init {
         // 데이터베이스에서 전날 걸음수를 가져와 stepsPrev에 저장
         scope.launch(Dispatchers.IO) {
-            stepsPrev = loadPreviousDaySteps()
+            // 부팅 날짜 가져오기
+            bootDate = sharedPreferences.getLong("bootDate", 0)
+
+            // 리부팅 날짜가 저장되어 있지 않으면 센서값에서 전날들의 걸음수 총합을 빼줘야 함
+            if (bootDate == 0L) {
+                stepsPrev = loadTotalSteps()
+            } else {
+                // 리부팅 날짜부터 어제까지의 걸음수 계산
+                val currentTimeMillis = System.currentTimeMillis()
+                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTimeMillis))
+                val yesterdayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTimeMillis - 24 * 60 * 60 * 1000))
+                stepsPrev = getStepsBetweenDates(yesterdayDate, currentDate)
+
+            }
         }
     }
 
     fun startListening() {
         stepSensor?.let { sensor ->
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-
-        scope.launch(Dispatchers.IO) {
-            val stepsTodayValue = _stepsToday.value ?: 0
-            saveStepsToDatabase(stepsTodayValue)
         }
     }
 
@@ -49,11 +61,7 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
         event?.let {
             if (it.sensor == stepSensor) {
                 val steps = it.values[0].toInt()
-                val realsteps = if (hasRebooted) {
-                    _stepsToday.value ?: 0
-                } else {
-                    steps - stepsPrev
-                }
+                val realsteps = steps-stepsPrev
                 _stepsToday.postValue(realsteps) // LiveData 값을 업데이트
                 saveStepsToDatabase(realsteps)
             }
@@ -84,27 +92,46 @@ class StepSensorHelper(private val context: Context,private val scope: Coroutine
                     todaySteps = steps,
                     goalSteps = sharedPrefs.getInt("stepsGoal", 0)
                 )
-                hasRebooted=false//새로운 엔티티가 생긴 후 저장되었으므로 리부팅 메세지 철회
+                hasRebooted = false//새로운 엔티티가 생긴 후 저장되었으므로 리부팅 메세지 철회
                 stepsDAO.insert(stepsEntity)
             }
         }
     }
+
     // 데이터베이스에서 전날 걸음수를 가져와 저장
-    private suspend fun loadPreviousDaySteps(): Int = withContext(Dispatchers.IO) {
+    private suspend fun loadTotalSteps(): Int = withContext(Dispatchers.IO) {
         val currentTimeMillis = System.currentTimeMillis()
         val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTimeMillis))
 
         val stepsDAO = StepsDatabase.getInstance(context).stepsDAO()
         val allStepsEntities = stepsDAO.getAll()
+        val todaySteps=stepsDAO.getByDate(todayDate)?.todaySteps?:0
 
-        // 오늘을 제외한 전체 날짜의 걸음수 합을 계산
+        // 전체 날짜의 걸음수 합을 계산
         val totalSteps = allStepsEntities
-            .filter { it.date != todayDate }
-            .sumBy { it.todaySteps?:0 }
+            .sumBy { it.todaySteps ?: 0 } - todaySteps
+
+        totalSteps
+
+    }
+
+    // 지정된 날짜 범위 내의 걸음수를 가져옴
+    private suspend fun getStepsBetweenDates(startTime: String, endTime: String): Int = withContext(Dispatchers.IO) {
+        if (startTime > endTime) {//초기화를 한 날짜가 어제 이후인 경우/ 즉 오늘 초기화가 되었다면 stepsPrev에 0 저장하여 차감 x
+            return@withContext 0
+        }
+        val stepsDAO = StepsDatabase.getInstance(context).stepsDAO()
+        val stepsEntities = stepsDAO.getStepsBetweenDates(startTime, endTime)
+
+        // 주어진 날짜 범위 내의 걸음수 합을 계산
+        val totalSteps = stepsEntities.sumBy { it.todaySteps ?: 0 }
 
         totalSteps
     }
+
     fun onReboot() {
         hasRebooted = true
+        bootDate = System.currentTimeMillis() // 핸드폰 부팅 날짜 업데이트
+        sharedPreferences.edit().putLong("bootDate", bootDate).apply()
     }
 }

@@ -44,16 +44,17 @@
             </intent-filter>
         </activity-alias>
         <receiver android:name=".RebootReceiver"
-            android:exported="false"> <!-- Here, set exported to false or true based on your app's requirements -->
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
 
-        <service
-            android:name=".MyForegroundService"
-            android:exported="false" />
+        <service android:name=".MyForegroundService"
+            android:exported="false">
+
+        </service>
 
     </application>
 

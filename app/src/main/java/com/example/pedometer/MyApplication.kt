@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.work.*
 import java.util.concurrent.TimeUnit
 
+@Suppress("DEPRECATION")
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -27,7 +28,7 @@ class MyApplication : Application() {
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "daily_work",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.REPLACE, // REPLACE로 변경
             workRequest
         )
         Log.e("MA", "MyWorker 호출")
